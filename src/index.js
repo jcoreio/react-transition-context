@@ -1,7 +1,6 @@
 /* @flow */
 
-import React from 'react'
+import featureLoader from './featureLoader'
 
-const Hello = () => <div>Hello world!</div>
+export {featureLoader}
 
-export default Hello

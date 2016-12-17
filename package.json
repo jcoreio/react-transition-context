@@ -1,7 +1,7 @@
 {
-  "name": "react-library-skeleton",
+  "name": "react-redux-features",
   "version": "0.0.0-development",
-  "description": "my personal skeleton for React library NPM packages",
+  "description": "React components for redux-features",
   "main": "lib/index.js",
   "scripts": {
     "lint": "eslint src test stories",
@@ -41,19 +41,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jedwards1211/react-library-skeleton.git"
+    "url": "git+https://github.com/jcoreio/react-redux-features.git"
   },
   "keywords": [
-    "es2015",
+    "redux-features",
     "react",
-    "skeleton"
+    "feature-oriented programming",
+    "fop"
   ],
   "author": "Andy Edwards",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jedwards1211/react-library-skeleton/issues"
+    "url": "https://github.com/jcoreio/react-redux-features/issues"
   },
-  "homepage": "https://github.com/jedwards1211/react-library-skeleton#readme",
+  "homepage": "https://github.com/jcoreio/react-redux-features#readme",
   "devDependencies": {
     "@jedwards1211/eslint-config-flow": "^1.0.0",
     "@jedwards1211/eslint-config-react": "^1.0.1",
@@ -91,13 +92,19 @@
     "react-addons-test-utils": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-hot-loader": "^3.0.0-beta.2",
+    "redux": "^3.6.0",
     "rimraf": "^2.5.4",
     "semantic-release": "^6.3.2",
-    "validate-commit-msg": "^2.8.2",
-    "@kadira/storybook": "^2.21.0"
+    "sinon": "^1.17.6",
+    "validate-commit-msg": "^2.8.2"
   },
   "peerDependencies": {
-    "react": "0.14.x || ^15.0.0"
+    "react": "0.14.x || ^15.0.0",
+    "redux-features": "^1.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "lodash.defaults": "^4.2.0",
+    "react-redux": "^5.0.1",
+    "reselect": "^2.5.4"
+  }
 }
