@@ -8,7 +8,7 @@
 ## Usage
 
 ```
-npm i --save react-redux-features
+npm i --save redux-features react-redux-features
 ```
 
 ### featureLoader(options)
