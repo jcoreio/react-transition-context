@@ -106,6 +106,7 @@
   },
   "dependencies": {
     "lodash.defaults": "^4.2.0",
+    "prop-types": "^15.0.0",
     "react-redux": "^5.0.1",
     "reselect": "^3.0.0"
   }
