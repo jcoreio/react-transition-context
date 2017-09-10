@@ -1,6 +1,9 @@
 // @flow
 
-import _featureLoader from './featureLoader.js.flow'
+import _featureLoader from './featureLoader'
+import _featureComponents from './featureComponents'
 
 declare export var featureLoader: typeof _featureLoader
+declare export var featureComponents: typeof _featureComponents
+
 

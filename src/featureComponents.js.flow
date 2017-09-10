@@ -1,0 +1,21 @@
+/* @flow */
+
+import React from 'react'
+import type {Feature, Features} from 'redux-features'
+import {connect} from 'react-redux'
+import {createSelector} from 'reselect'
+
+type Components<P: Object> = React.Element<P>
+  | ReactClass<P>
+  | Array<React.Element<P> | ReactClass<P>>
+
+type Options<S, A, P: Object> = {
+  getFeatures?: (state: S) => Features<S, A>,
+  sortFeatures?: (features: Features<S, A>) => Array<Feature<S, A>>,
+  getComponents: (feature: Feature<S, A>) => Components<P>,
+}
+
+declare export default function featureComponents<S, A, P: Object>(
+  options: Options<S, A, P>,
+): ReactClass<P>;
+

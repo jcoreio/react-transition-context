@@ -1,14 +1,14 @@
 // @flow
 
 import React from 'react'
-import type {FeatureState, FeatureStates} from 'redux-features'
+import type {Feature, Features, FeatureState, FeatureStates} from 'redux-features'
 
-export type Options<P: Object> = {
-  getFeatures?: (state: any) => ?Object,
-  getFeatureStates?: (state: any) => ?FeatureStates,
+export type Options<S, A, P: Object> = {
+  getFeatures?: (state: S) => ?Features<S, A>,
+  getFeatureStates?: (state: S) => ?FeatureStates,
   featureId: string,
-  render: (options: {featureState: FeatureState, feature: ?Object, props: P}) => ?React.Element<any>,
+  render: (options: {featureState: FeatureState, feature: ?Feature<S, A>, props: P}) => ?React.Element<any>,
 }
 
-declare export default function loadFeatureComponent<P: Object>(options: Options<P>): (props: P) => React.Element<any>
+declare export default function loadFeatureComponent<S, A, P: Object>(options: Options<S, A, P>): (props: P) => React.Element<any>
 
