@@ -81,3 +81,228 @@ const ConfigView = myFeatureLoader({
 const configViewElem = <ConfigView config={...} />
 ```
 
+### featureComponents(options)
+
+Creates a component that renders zero or more components from features.  Unlike `featureLoader`, it doesn't
+automatically load any features.
+
+`options` may contain the following fields:
+- `getFeatures` *(Function)*: function that takes the redux `state` and returns the features (default: `state => state.features`)
+- `sortFeatures` *(Function)*: function that takes the `features` and returns an array sorted however you choose.  The
+  components from features rendered by the HOC will appear in this order.
+- `getComponents` *(Function)*: function that takes  a `Feature` and returns a React element, React Component, or array
+  of either/both.
+  
+All props passed to the HOC will be passed through to the feature components.
+
+#### Example
+
+Imagine you wanted three separate teams in your company to create subpanels for a user's account details, profile, 
+and orders.
+
+But you don't want them to have to touch the main code for the user view, which is maintained by a fourth
+team.  That team uses `featureComponents` to specify an "insertion point" for any other teams' subpanels:
+
+```es6
+import React from 'react'
+import sortBy from 'lodash.sortby'
+import {featureComponents} from 'react-redux-features'
+
+const UserViewSubpanels = featureComponents({
+  sortFeatures: features => sortBy(features, 'indexInUserView'),
+  getComponents: feature => feature.UserViewSubpanels,
+})
+const UserView = ({user}) => (
+  <div>
+    <h1>User Profile</h1>
+    <UserViewSubpanels user={user} />
+  </div>
+)
+```
+
+The user account team could write a feature like this to insert its panel:
+```es6
+import React from 'react'
+import Panel from './Panel'
+import store from './store'
+import {addFeature} from 'redux-features'
+
+const UserAccountPanel = ({user}) => (
+  <Panel title="Account">
+    <form onSubmit={...}>
+      Username: <input name="username" type="text" value={user.username} />
+      Password: <input name="password" type="password" value={user.password} />
+    </form>
+  </Panel>
+)
+
+store.dispatch(addFeature('userAccount', {
+  indexInUserView: 0,
+  userViewSubpanels: UserAccountPanel
+}))
+```
+
+The user profile team would write the following:
+```es6
+import React from 'react'
+import Panel from './Panel'
+import store from './store'
+import {addFeature} from 'redux-features'
+
+const UserProfilePanel = ({user}) => (
+  <Panel title="Profile">
+    <form onSubmit={...}>
+      First name: <input name="firstName" type="text" value={user.firstName} /> 
+      Last name: <input name="lastName" type="text" value={user.lastName} /> 
+    </form>
+  </Panel>
+)
+
+store.dispatch(addFeature('userProfile', {
+  indexInUserView: 1,
+  userViewSubpanels: UserProfilePanel
+}))
+```
+
+And the user orders team would write:
+```es6
+import React from 'react'
+import Panel from './Panel'
+import store from './store'
+import {addFeature} from 'redux-features'
+
+const UserOrdersPanel = ({user}) => (
+  <Panel title="Orders">
+    <table>
+      <thead>
+        <tr>
+          <td>Order Number</td>
+          <td>Date</td>
+          <td>Item</td>
+          <td>Tracking Number</td>
+        </tr>
+      </thead>
+      <tbody>
+        {user.orders.map((order, key) =>
+          <tr key={key}>
+            <td>{order.number}</td>
+            <td>{order.date}</td>
+            <td>{order.itemName}</td>
+            <td><a href={...}>{order.trackingNumber}</a></td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </Panel>
+)
+
+store.dispatch(addFeature('userOrders', {
+  indexInUserView: 2,
+  userViewSubpanels: UserOrdersPanel,
+}))
+```
+
+### featureContent(options)
+
+This is very similar to `featureComponents`, but it works a bit differently.  It was designed for getting routes
+(for `react-router`) from features.
+
+`featureContent(...)` creates a FeatureContent component that gets some content from zero or more features in your
+store, makes an array of all the content, and then passes the array to a child rendering function.
+
+`options` may contain the following fields:
+- `getFeatures` *(Function)*: function that takes the redux `state` and returns the features (default: `state => state.features`)
+- `sortFeatures` *(Function)*: function that takes the `features` and returns an array sorted however you choose.  The
+  components from features rendered by the HOC will appear in this order.
+- `getContent` *(Function)*: function that takes  a `Feature` and returns the content.  If the content is a function,
+  it will be called with the props passed to the `<FeatureContent>` instance.
+
+For `getContent: feature => feature.stuff`, a feature's `stuff` property may be a single value, an array of values, or
+a function that takes the props passed to `<FeatureContent>` and returns either a single value or array of
+values.
+
+`<FeatureContent>` will concatenate the values from all features into a single flat array, and either render
+those values inside a `<div>`, or if you pass a child function to `<FeatureContent>`, it will call that function with
+the array of values and render what it returns.
+
+#### Example
+
+Let's say you have an app with a `/` route and an `/about` route, but you want features to be able to define additional
+routes to go alongside these.  You will put the additional routes in a feature's `rootRoutes` property.  Here's how you
+would get the routes from the features and include them with the `/` and `/about` routes:
+
+```js
+import {featureContent} from 'react-redux-features'
+
+const RootRoutes = featureContent({getContent: feature => feature.rootRoutes})
+
+<Router>
+  <RootRoutes>
+    {routes =>
+      <Switch>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/about" component={About} />
+        {routes}
+      </Switch>
+    }
+  </RootRoutes>
+</Router>
+```
+
+And here is what some of the features might look like:
+
+```js
+const ordersFeature = {
+  rootRoutes: [
+    <Route path="orders/buying" component={BuyingOrders} />,
+    <Route path="orders/selling" component={SellingOrders} />,
+  ],
+}
+
+const UserSubRoutes = featureContent({getContent: feature => feature.userSubRoutes})
+const userFeature = {
+  rootRoutes: <Route path="/user" render={({match, location}) =>
+    <div>
+      <UserView match={match}>
+      <UserSubRoutes match={match} location={location} />
+    </div>
+  }/>
+}
+```
+
+In this case `<RootRoutes>` will call its child function with
+```js
+[
+  <Route key={...} path="orders/buying" component={BuyingOrders} />,
+  <Route key={...} path="orders/selling" component={SellingOrders} />,
+  <Route key={...} path="/user" render={...} />,
+]
+```
+So the `<Switch>` will render these as siblings of the `/` and `/about` routes.
+
+Notice how the `userFeature` plans to include additional routes underneath `/user`.
+The following features use a function for `userSubRoutes`; the `UserSubRoutes` component will call the function
+with the `match` and `location` props it received.
+
+```js
+const userProfileFeature = {
+  dependencies: ['userFeature'],
+  userSubRoutes: ({match}) => <Route path={`${match.url}/profile`} component={UserProfile} />
+}
+
+const userOrdersFeature = {
+  dependencies: ['userFeature'],
+  userSubRoutes: ({match}) => [
+    <Route path={`${match.url}/orders/buying`} component={UserBuyingOrders} />,
+    <Route path={`${match.url}/orders/selling`} component={UserSellingOrders} />,
+  ],
+}
+```
+So the `UserSubRoutes` component will render the following children:
+
+```js
+<Route key={...} path="/user/profile" component={UserProfile} />
+<Route key={...} path="/user/orders/buying" component={UserBuyingOrders} />
+<Route key={...} path="/user/orders/selling" component={UserSellingOrders} />
+```
+

@@ -2,60 +2,68 @@
 
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import type {Dispatch} from 'redux'
 import {loadFeature} from 'redux-features'
-import type {FeatureState, FeatureStates} from 'redux-features'
+import type {Feature, Features, FeatureState, FeatureStates} from 'redux-features'
 import {createSelector} from 'reselect'
 import defaults from 'lodash.defaults'
 
-export type Options<P: Object> = {
-  getFeatures?: (state: any) => ?Object,
-  getFeatureStates?: (state: any) => ?FeatureStates,
+export type Options<S, A, P: Object> = {
+  getFeatures?: (state: S) => ?Features<S, A>,
+  getFeatureStates?: (state: S) => ?FeatureStates,
   featureId: string,
-  render?: (options: {featureState: FeatureState, feature: ?Object, props: P}) => ?React.Element<any>,
+  render?: (options: {featureState: FeatureState, feature: ?Feature<S, A>, props: P}) => ?React.Element<any>,
 }
 
-type SelectProps = {
-  feature: ?Object,
-  featureState: FeatureState,
-}
+export default function featureLoader<S, A, P: Object>(options: Options<S, A, P>): ReactClass<P> {
+  type PropsFromState = {
+    feature: ?Feature<S, A>,
+    featureState: FeatureState,
+  }
 
-type LoaderProps<P: Object> = SelectProps & {
-  featureComponentProps: P,
-  dispatch: (action: Object) => any,
-}
+  type PropsFromDispatch = {
+    dispatch: Dispatch<A>,
+  }
 
-export default function featureLoader<P: Object>(options: Options<P>): (props: P) => React.Element<any> {
+  type MergedProps = {
+    children?: any,
+    featureState: FeatureState,
+    dispatch: Dispatch<A>,
+  }
+
   const {getFeatures, getFeatureStates, featureId, render} = defaults({}, options, {
     getFeatures: state => state ? state.features : undefined,
     getFeatureStates: state => state ? state.featureStates : undefined,
   })
-  const select: (state: any) => SelectProps = createSelector(
+  const mapStateToProps: (state: S) => PropsFromState = createSelector(
     getFeatures,
     getFeatureStates,
-    (features = {}, featureStates = {}) => ({
+    (features: Features<S, A> = {}, featureStates: FeatureStates = {}): PropsFromState => ({
       feature: features[featureId],
       featureState: featureStates[featureId],
     })
   )
 
-  class FeatureLoader extends Component<void, LoaderProps<P>, void> {
+  function mergeProps({feature, featureState}: PropsFromState, {dispatch}: PropsFromDispatch, props: P): MergedProps {
+    return {
+      dispatch,
+      featureState,
+      children: render
+        ? render({feature, featureState, props})
+        : null,
+    }
+  }
+
+  class FeatureLoader extends Component<void, MergedProps, void> {
     componentWillMount() {
       const {featureState, dispatch} = this.props
       if (featureState === 'NOT_LOADED') dispatch(loadFeature(featureId))
     }
     render(): ?React.Element<any> {
-      const {featureState, feature, featureComponentProps} = this.props
-      return (
-        render
-          ? render({featureState, feature, props: featureComponentProps})
-          : null
-      )
+      return this.props.children
     }
   }
 
-  const Wrapped = connect(select)(FeatureLoader)
-
-  const FeatureComponentProxy = (props: P) => <Wrapped featureComponentProps={props} />
-  return FeatureComponentProxy
+  return connect(mapStateToProps, null, mergeProps)(FeatureLoader)
 }
 
