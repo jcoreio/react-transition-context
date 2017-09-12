@@ -286,10 +286,12 @@ with the `match` and `location` props it received.
 
 ```js
 const userProfileFeature = {
+  dependencies: ['userFeature'],
   userSubRoutes: ({match}) => <Route path={`${match.url}/profile`} component={UserProfile} />
 }
 
 const userOrdersFeature = {
+  dependencies: ['userFeature'],
   userSubRoutes: ({match}) => [
     <Route path={`${match.url}/orders/buying`} component={UserBuyingOrders} />,
     <Route path={`${match.url}/orders/selling`} component={UserSellingOrders} />,
