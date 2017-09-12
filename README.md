@@ -202,3 +202,105 @@ store.dispatch(addFeature('userOrders', {
 }))
 ```
 
+### featureContent(options)
+
+This is very similar to `featureComponents`, but it works a bit differently.  It was designed for getting routes
+(for `react-router`) from features.
+
+`featureContent(...)` creates a FeatureContent component that gets some content from zero or more features in your
+store, makes an array of all the content, and then passes the array to a child rendering function.
+
+`options` may contain the following fields:
+- `getFeatures` *(Function)*: function that takes the redux `state` and returns the features (default: `state => state.features`)
+- `sortFeatures` *(Function)*: function that takes the `features` and returns an array sorted however you choose.  The
+  components from features rendered by the HOC will appear in this order.
+- `getContent` *(Function)*: function that takes  a `Feature` and returns the content.  If the content is a function,
+  it will be called with the props passed to the `<FeatureContent>` instance.
+
+For `getContent: feature => feature.stuff`, a feature's `stuff` property may be a single value, an array of values, or
+a function that takes the props passed to `<FeatureContent>` and returns either a single value or array of
+values.
+
+`<FeatureContent>` will concatenate the values from all features into a single flat array, and either render
+those values inside a `<div>`, or if you pass a child function to `<FeatureContent>`, it will call that function with
+the array of values and render what it returns.
+
+#### Example
+
+Let's say you have an app with a `/` route and an `/about` route, but you want features to be able to define additional
+routes to go alongside these.  You will put the additional routes in a feature's `rootRoutes` property.  Here's how you
+would get the routes from the features and include them with the `/` and `/about` routes:
+
+```js
+import {featureContent} from 'react-redux-features'
+
+const RootRoutes = featureContent({getContent: feature => feature.rootRoutes})
+
+<Router>
+  <RootRoutes>
+    {routes =>
+      <Switch>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/about" component={About} />
+        {routes}
+      </Switch>
+    }
+  </RootRoutes>
+</Router>
+```
+
+And here is what some of the features might look like:
+
+```js
+const ordersFeature = {
+  rootRoutes: [
+    <Route path="orders/buying" component={BuyingOrders} />,
+    <Route path="orders/selling" component={SellingOrders} />,
+  ],
+}
+
+const UserSubRoutes = featureContent({getContent: feature => feature.userSubRoutes})
+const userFeature = {
+  rootRoutes: <Route path="/user" render={({match, location}) =>
+    <div>
+      <UserView match={match}>
+      <UserSubRoutes match={match} location={location} />
+    </div>
+  }/>
+}
+```
+
+In this case `<RootRoutes>` will call its child function with
+```js
+[
+  <Route key={...} path="orders/buying" component={BuyingOrders} />,
+  <Route key={...} path="orders/selling" component={SellingOrders} />,
+  <Route key={...} path="/user" render={...} />,
+]
+```
+So the `<Switch>` will render these as siblings of the `/` and `/about` routes.
+
+Notice how the `userFeature` plans to include additional routes underneath `/user`.
+The following features use a function for `userSubRoutes`; the `UserSubRoutes` component will call the function
+with the `match` and `location` props it received.
+
+```js
+const userProfileFeature = {
+  userSubRoutes: ({match}) => <Route path={`${match.url}/profile`} component={UserProfile} />
+}
+
+const userOrdersFeature = {
+  userSubRoutes: ({match}) => [
+    <Route path={`${match.url}/orders/buying`} component={UserBuyingOrders} />,
+    <Route path={`${match.url}/orders/selling`} component={UserSellingOrders} />,
+  ],
+}
+```
+So the `UserSubRoutes` component will render the following children:
+
+```js
+<Route key={...} path="/user/profile" component={UserProfile} />
+<Route key={...} path="/user/orders/buying" component={UserBuyingOrders} />
+<Route key={...} path="/user/orders/selling" component={UserSellingOrders} />
+```
+

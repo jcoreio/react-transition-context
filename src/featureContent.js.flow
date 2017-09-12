@@ -1,0 +1,15 @@
+/* @flow */
+
+import React from 'react'
+import type {Feature, Features} from 'redux-features'
+
+type Options<S, A> = {
+  getFeatures?: (state: S) => Features<S, A>,
+  sortFeatures?: (features: Features<S, A>) => Array<Feature<S, A>>,
+  getContent: (feature: Feature<S, A>) => any,
+}
+
+declare export default function featureContent<S, A, P: Object>(
+  options: Options<S, A>,
+): ReactClass<P & {children: (content: Array<any>) => ?React.Element<any>}>;
+

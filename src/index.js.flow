@@ -2,8 +2,11 @@
 
 import _featureLoader from './featureLoader'
 import _featureComponents from './featureComponents'
+import _featureContent from './featureContent'
 
 declare export var featureLoader: typeof _featureLoader
 declare export var featureComponents: typeof _featureComponents
+declare export var featureContent: typeof _featureContent
+
 
 

@@ -10,7 +10,9 @@ import {
   loadFeatureMiddleware, featureMiddlewaresMiddleware, addFeature, loadInitialFeatures,
   LOAD_FEATURE,
 } from 'redux-features'
-import {featureLoader, featureComponents} from '../src'
+import {featureLoader, featureComponents, featureContent} from '../src'
+import {Router, Route, Switch} from 'react-router-dom'
+import {createMemoryHistory} from 'history'
 
 describe('integration test', () => {
   describe('featureLoader', () => {
@@ -138,13 +140,10 @@ describe('integration test', () => {
   })
   describe('featureComponents', () => {
     it('client-side rendering works', async function () {
-      const reducer = composeReducers(
-        combineReducers({
-          features: featuresReducer(),
-          featureStates: featureStatesReducer(),
-        }),
-        featureReducersReducer()
-      )
+      const reducer = combineReducers({
+        features: featuresReducer(),
+        featureStates: featureStatesReducer(),
+      })
 
       const store = createStore(reducer)
 
@@ -192,6 +191,86 @@ describe('integration test', () => {
       )
 
       expect(mount(app2).text()).to.equal('BearLionbig TigerDogZebra')
+    })
+  })
+  describe('featureContent', () => {
+    it('works with react-router', async function () {
+      const reducer = combineReducers({
+        features: featuresReducer(),
+        featureStates: featureStatesReducer(),
+      })
+
+      const store = createStore(reducer)
+
+      const RootRoutes = featureContent({
+        getContent: feature => feature.rootRoutes,
+      })
+      const UserViewRoutes = featureContent({
+        getContent: feature => feature.userViewRoutes,
+      })
+
+      const UserView = props => (
+        <div>
+          <h1>User {props.match.params.userId}</h1>
+          <UserViewRoutes {...props} />
+        </div>
+      )
+
+      const userViewFeature = {
+        rootRoutes: (
+          <Route path="/users/:userId" component={UserView} />
+        ),
+      }
+
+      const UserProfileView = () => <h3>Profile</h3>
+      const ProfileRoute = ({match}) => (
+        <Route path={`${match.url}/profile`} component={UserProfileView} />
+      )
+      const userProfileViewFeature = {
+        userViewRoutes: ProfileRoute,
+      }
+
+      const ChangePasswordView = () => <h3>Change Password</h3>
+      const UserOrdersView = () => <h3>Orders</h3>
+      const otherUserRoutesFeature = {
+        userViewRoutes: ({match}) => [
+          /* eslint-disable react/jsx-key */
+          <Route path={`${match.url}/changePassword`} component={ChangePasswordView} />,
+          <Route path={`${match.url}/orders`} component={UserOrdersView} />,
+          /* eslint-enable react/jsx-key */
+        ],
+      }
+
+      store.dispatch(addFeature('userView', userViewFeature))
+      store.dispatch(addFeature('userProfileView', userProfileViewFeature))
+      store.dispatch(addFeature('otherUserRoutes', otherUserRoutesFeature))
+
+      const history = createMemoryHistory({
+        initialEntries: ['/users/andy/changePassword'],
+        initialIndex: 0,
+      })
+
+      const app = (
+        <Provider store={store}>
+          <Router history={history}>
+            <Route render={props =>
+              <RootRoutes {...props}>
+                {routes =>
+                  <Switch>
+                    {routes}
+                  </Switch>
+                }
+              </RootRoutes>
+            }
+            />
+          </Router>
+        </Provider>
+      )
+      const comp = mount(app)
+      expect(comp.text()).to.equal('User andyChange Password')
+
+      history.push('/users/andy/orders')
+      expect(comp.text()).to.equal('User andyOrders')
     })
   })
 })
