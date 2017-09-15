@@ -112,8 +112,6 @@
     "lodash.defaults": "^4.2.0",
     "prop-types": "^15.0.0",
     "react-redux": "^5.0.1",
-    "react-redux-features": "^1.0.2",
-    "react-transition-context": "^1.0.0-beta9",
     "reselect": "^3.0.0"
   }
 }
