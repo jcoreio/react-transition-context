@@ -1,6 +1,6 @@
 /* @flow */
 
-import React from 'react'
+import * as React from 'react';
 import type {Feature, Features} from 'redux-features'
 
 type Options<S, A> = {
@@ -11,5 +11,5 @@ type Options<S, A> = {
 
 declare export default function featureContent<S, A, P: Object>(
   options: Options<S, A>,
-): ReactClass<P & {children: (content: Array<any>) => ?React.Element<any>}>;
+): React.ComponentType<P & {children: (content: Array<any>) => ?React.Element<any>}>;
 

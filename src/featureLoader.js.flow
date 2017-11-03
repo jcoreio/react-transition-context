@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import * as React from 'react';
 import type {Feature, Features, FeatureState, FeatureStates} from 'redux-features'
 
 export type Options<S, A, P: Object> = {

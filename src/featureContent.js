@@ -1,6 +1,6 @@
 /* @flow */
 
-import React from 'react'
+import * as React from 'react'
 import defaults from 'lodash.defaults'
 import type {Feature, Features} from 'redux-features'
 import {connect} from 'react-redux'
@@ -14,7 +14,7 @@ type Options<S, A> = {
 
 export default function featureContent<S, A, P: Object>(
   options: Options<S, A>,
-): ReactClass<P & {children: (content: Array<any>) => ?React.Element<any>}> {
+): React.ComponentType<P & {children: (content: Array<any>) => ?React.Element<any>}> {
   const {getFeatures, sortFeatures, getContent} = defaults({}, options, {
     getFeatures: state => state ? state.features : {},
     sortFeatures: features => Object.values(features),

@@ -1,6 +1,6 @@
 // @flow
 
-import React, {Component} from 'react'
+import * as React from 'react'
 import {connect} from 'react-redux'
 import type {Dispatch} from 'redux'
 import {loadFeature} from 'redux-features'
@@ -15,7 +15,7 @@ export type Options<S, A, P: Object> = {
   render?: (options: {featureState: FeatureState, feature: ?Feature<S, A>, props: P}) => ?React.Element<any>,
 }
 
-export default function featureLoader<S, A, P: Object>(options: Options<S, A, P>): ReactClass<P> {
+export default function featureLoader<S, A, P: Object>(options: Options<S, A, P>): React.ComponentType<P> {
   type PropsFromState = {
     feature: ?Feature<S, A>,
     featureState: FeatureState,
@@ -54,12 +54,13 @@ export default function featureLoader<S, A, P: Object>(options: Options<S, A, P>
     }
   }
 
-  class FeatureLoader extends Component<void, MergedProps, void> {
+  class FeatureLoader extends React.Component<P> {
+    static defaultProps: MergedProps;
     componentWillMount() {
       const {featureState, dispatch} = this.props
       if (featureState === 'NOT_LOADED') dispatch(loadFeature(featureId))
     }
-    render(): ?React.Element<any> {
+    render(): React.Node {
       return this.props.children
     }
   }

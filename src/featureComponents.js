@@ -1,14 +1,14 @@
 /* @flow */
 
-import React from 'react'
+import * as React from 'react'
 import defaults from 'lodash.defaults'
 import type {Feature, Features} from 'redux-features'
 import {connect} from 'react-redux'
 import {createStructuredSelector, createSelector} from 'reselect'
 
-type Components<P: Object> = React.Element<P>
-  | ReactClass<P>
-  | Array<React.Element<P> | ReactClass<P>>
+type Components<P: Object> = React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>>
+  | React.ComponentType<P>
+  | Array<React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>> | React.ComponentType<P>>
 
 type Options<S, A, P: Object> = {
   getFeatures?: (state: S) => Features<S, A>,
@@ -18,7 +18,7 @@ type Options<S, A, P: Object> = {
 
 export default function featureComponents<S, A, P: Object>(
   options: Options<S, A, P>,
-): ReactClass<P> {
+): React.ComponentType<P> {
   const {getFeatures, sortFeatures, getComponents} = defaults({}, options, {
     getFeatures: state => state ? state.features : {},
     sortFeatures: features => Object.values(features),
@@ -41,7 +41,7 @@ export default function featureComponents<S, A, P: Object>(
       let components = getComponents(feature)
       if (components == null) return
       if (!Array.isArray(components)) components = [components]
-      components.forEach((Comp: React.Element<P> | ReactClass<P>, index: number) => {
+      components.forEach((Comp: React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>> | React.ComponentType<P>, index: number) => {
         const key = featureIndex + ':' + index
         if (React.isValidElement(Comp)) renderedComponents.push(React.cloneElement((Comp: any), {...props, key}))
         else if (typeof Comp === 'function') renderedComponents.push(<Comp {...props} key={key} />)
