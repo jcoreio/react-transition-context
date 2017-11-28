@@ -6,9 +6,9 @@ import type {Feature, Features} from 'redux-features'
 import {connect} from 'react-redux'
 import {createStructuredSelector, createSelector} from 'reselect'
 
-type Components<P: Object> = React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>>
+type Components<P: Object> = React.Element<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<P>>>>>>>>>>>
   | React.ComponentType<P>
-  | Array<React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>> | React.ComponentType<P>>
+  | Array<React.Element<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<P>>>>>>>>>>> | React.ComponentType<P>>
 
 type Options<S, A, P: Object> = {
   getFeatures?: (state: S) => Features<S, A>,
@@ -41,7 +41,7 @@ export default function featureComponents<S, A, P: Object>(
       let components = getComponents(feature)
       if (components == null) return
       if (!Array.isArray(components)) components = [components]
-      components.forEach((Comp: React.Element<React.ComponentType<React.ComponentType<React.ComponentType<P>>>> | React.ComponentType<P>, index: number) => {
+      components.forEach((Comp: React.Element<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<React.ComponentType<P>>>>>>>>>>> | React.ComponentType<P>, index: number) => {
         const key = featureIndex + ':' + index
         if (React.isValidElement(Comp)) renderedComponents.push(React.cloneElement((Comp: any), {...props, key}))
         else if (typeof Comp === 'function') renderedComponents.push(<Comp {...props} key={key} />)

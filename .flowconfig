@@ -3,6 +3,7 @@
 .*/node_modules/.*/__test__/.*
 .*/node_modules/.*/tests?/.*\.json
 .*/node_modules/fbjs/.*
+.*/node_modules/immutable/.*
 
 [include]
 ./src

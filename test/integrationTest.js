@@ -254,13 +254,13 @@ describe('integration test', () => {
         <Provider store={store}>
           <Router history={history}>
             <Route render={props =>
-              <RootRoutes {...props}>
+              (<RootRoutes {...props}>
                 {routes =>
-                  <Switch>
+                  (<Switch>
                     {routes}
-                  </Switch>
+                  </Switch>)
                 }
-              </RootRoutes>
+              </RootRoutes>)
             }
             />
           </Router>
