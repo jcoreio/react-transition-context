@@ -4,6 +4,9 @@ import {renderToString} from 'react-dom/server'
 import {combineReducers, createStore, applyMiddleware} from 'redux'
 import {connect, Provider} from 'react-redux'
 import {mount} from 'enzyme'
+import {configure as configureEnzyme} from 'enzyme'
+import Adapter from 'enzyme-adapter-react-16'
+configureEnzyme({ adapter: new Adapter() })
 import {expect} from 'chai'
 import {
   composeReducers, featuresReducer, featureStatesReducer, featureReducersReducer,
