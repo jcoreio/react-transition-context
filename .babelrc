@@ -1,26 +1,68 @@
 {
-  presets: [
-    'es2015',
-    'stage-1',
-    'flow',
-    'react',
+  "presets": [
+    "flow",
+    "react"
   ],
-  plugins: [
-    'transform-runtime',
-    'lodash',
+  "plugins": [
+    "syntax-dynamic-import",
+    "transform-class-properties",
+    "transform-export-extensions",
+    "transform-object-rest-spread",
+    "flow-react-proptypes",
+    "lodash"
   ],
-  env: {
-    test: {
-      plugins: [
-        'istanbul',
-        'lodash',
+  "env": {
+    "test": {
+      "presets": [
+        ["env", {"targets": {"node": "current"}}],
+        "flow", "react"
       ],
+      "plugins": [
+        "syntax-dynamic-import",
+        "transform-class-properties",
+        "transform-export-extensions",
+        "transform-object-rest-spread",
+        "flow-react-proptypes",
+        "transform-runtime",
+        "lodash"
+      ]
     },
-    production: {
-      plugins: [
-        'transform-react-constant-elements',
-        'lodash',
+    "coverage": {
+      "presets": [
+        ["env", {"targets": {"node": "current"}}],
+        "flow", "react"
       ],
+      "plugins": [
+        "syntax-dynamic-import",
+        "transform-class-properties",
+        "transform-export-extensions",
+        "transform-object-rest-spread",
+        "flow-react-proptypes",
+        "transform-runtime",
+        "istanbul",
+        "lodash"
+      ]
     },
-  },
+    "es5": {
+      "presets": [
+        ["env", {"forceAllTransforms": true}],
+        "stage-1", "flow", "react"
+      ],
+      "plugins": [
+        "transform-runtime",
+        "lodash"
+      ]
+    },
+    "production": {
+      "plugins": [
+        "syntax-dynamic-import",
+        "transform-class-properties",
+        "transform-export-extensions",
+        "transform-object-rest-spread",
+        "flow-react-proptypes",
+        "transform-react-constant-elements",
+        "lodash"
+      ]
+    }
+  }
 }

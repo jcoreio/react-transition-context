@@ -5,6 +5,11 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
+## Legacy build Notice
+
+If you are building for legacy browsers with webpack or similar bundlers, you
+may need to add a rule to transpile this package to ES5.
+
 ## Usage
 
 ```
@@ -92,12 +97,12 @@ automatically load any features.
   components from features rendered by the HOC will appear in this order.
 - `getComponents` *(Function)*: function that takes  a `Feature` and returns a React element, React Component, or array
   of either/both.
-  
+
 All props passed to the HOC will be passed through to the feature components.
 
 #### Example
 
-Imagine you wanted three separate teams in your company to create subpanels for a user's account details, profile, 
+Imagine you wanted three separate teams in your company to create subpanels for a user's account details, profile,
 and orders.
 
 But you don't want them to have to touch the main code for the user view, which is maintained by a fourth
@@ -152,8 +157,8 @@ import {addFeature} from 'redux-features'
 const UserProfilePanel = ({user}) => (
   <Panel title="Profile">
     <form onSubmit={...}>
-      First name: <input name="firstName" type="text" value={user.firstName} /> 
-      Last name: <input name="lastName" type="text" value={user.lastName} /> 
+      First name: <input name="firstName" type="text" value={user.firstName} />
+      Last name: <input name="lastName" type="text" value={user.lastName} />
     </form>
   </Panel>
 )
@@ -305,4 +310,3 @@ So the `UserSubRoutes` component will render the following children:
 <Route key={...} path="/user/orders/buying" component={UserBuyingOrders} />
 <Route key={...} path="/user/orders/selling" component={UserSellingOrders} />
 ```
-
