@@ -1,7 +1,7 @@
 /* @flow */
 
 import * as React from 'react'
-import defaults from 'lodash.defaults'
+import { defaults } from "lodash"
 import type {Feature, Features} from 'redux-features'
 import {connect} from 'react-redux'
 import {createStructuredSelector, createSelector} from 'reselect'

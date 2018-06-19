@@ -1,5 +1,5 @@
 import React from 'react'
-import sortBy from 'lodash.sortby'
+import { sortBy } from "lodash"
 import {renderToString} from 'react-dom/server'
 import {combineReducers, createStore, applyMiddleware} from 'redux'
 import {connect, Provider} from 'react-redux'

@@ -6,7 +6,7 @@ import type {Dispatch} from 'redux'
 import {loadFeature} from 'redux-features'
 import type {Feature, Features, FeatureState, FeatureStates} from 'redux-features'
 import {createSelector} from 'reselect'
-import defaults from 'lodash.defaults'
+import { defaults } from "lodash"
 
 export type Options<S, A, P: Object> = {
   getFeatures?: (state: S) => ?Features<S, A>,

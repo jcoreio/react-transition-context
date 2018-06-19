@@ -1,12 +1,26 @@
 {
-  "presets": ["es2015", "stage-1", "flow", "react"],
-  "plugins": ["transform-runtime"],
-  "env": {
-    "test": {
-      "plugins": ["istanbul"]
+  presets: [
+    'es2015',
+    'stage-1',
+    'flow',
+    'react',
+  ],
+  plugins: [
+    'transform-runtime',
+    'lodash',
+  ],
+  env: {
+    test: {
+      plugins: [
+        'istanbul',
+        'lodash',
+      ],
     },
-    "production": {
-      "plugins": ["transform-react-constant-elements"]
-    }
-  }
+    production: {
+      plugins: [
+        'transform-react-constant-elements',
+        'lodash',
+      ],
+    },
+  },
 }
