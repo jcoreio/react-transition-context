@@ -8,7 +8,6 @@
     "transform-class-properties",
     "transform-export-extensions",
     "transform-object-rest-spread",
-    "flow-react-proptypes",
     "lodash"
   ],
   "env": {
@@ -22,7 +21,6 @@
         "transform-class-properties",
         "transform-export-extensions",
         "transform-object-rest-spread",
-        "flow-react-proptypes",
         "transform-runtime",
         "lodash"
       ]
@@ -37,7 +35,6 @@
         "transform-class-properties",
         "transform-export-extensions",
         "transform-object-rest-spread",
-        "flow-react-proptypes",
         "transform-runtime",
         "istanbul",
         "lodash"
@@ -59,7 +56,6 @@
         "transform-class-properties",
         "transform-export-extensions",
         "transform-object-rest-spread",
-        "flow-react-proptypes",
         "transform-react-constant-elements",
         "lodash"
       ]
