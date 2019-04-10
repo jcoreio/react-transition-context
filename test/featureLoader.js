@@ -1,14 +1,14 @@
 import React from 'react'
-import {expect} from 'chai'
-import {createStore} from 'redux'
-import {Provider} from 'react-redux'
-import {mount} from 'enzyme'
-import {configure as configureEnzyme} from 'enzyme'
+import { expect } from 'chai'
+import { createStore } from 'redux'
+import { Provider } from 'react-redux'
+import { mount } from 'enzyme'
+import { configure as configureEnzyme } from 'enzyme'
 import Adapter from 'enzyme-adapter-react-16'
 configureEnzyme({ adapter: new Adapter() })
 import sinon from 'sinon'
-import {featureLoader} from '../src'
-import {loadFeature} from 'redux-features'
+import { featureLoader } from '../src'
+import { loadFeature } from 'redux-features'
 
 describe('featureLoader', () => {
   it('behaves when state is undefined', () => {
@@ -27,7 +27,8 @@ describe('featureLoader', () => {
       </Provider>
     )
 
-    expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be.false
+    expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be
+      .false
   })
   it("dispatches loadFeature action if feature isn't loaded", () => {
     const Comp = featureLoader({
@@ -40,7 +41,7 @@ describe('featureLoader', () => {
     const store = createStore(reducer, {
       featureStates: {
         test: 'NOT_LOADED',
-      }
+      },
     })
 
     mount(
@@ -60,7 +61,7 @@ describe('featureLoader', () => {
     const reducer = sinon.spy(state => state)
 
     const store = createStore(reducer, {
-      featureStates: {}
+      featureStates: {},
     })
 
     mount(
@@ -69,7 +70,8 @@ describe('featureLoader', () => {
       </Provider>
     )
 
-    expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be.false
+    expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be
+      .false
   })
   it("doesn't dispatch loadFeature action if feature is loading, loaded, or failed", () => {
     const Comp = featureLoader({
@@ -83,7 +85,7 @@ describe('featureLoader', () => {
       const store = createStore(reducer, {
         featureStates: {
           test: featureState,
-        }
+        },
       })
 
       mount(
@@ -92,7 +94,8 @@ describe('featureLoader', () => {
         </Provider>
       )
 
-      expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be.false
+      expect(reducer.calledWith(store.getState(), loadFeature('test'))).to.be
+        .false
     }
   })
   it('behaves when render is not given', () => {
@@ -101,7 +104,12 @@ describe('featureLoader', () => {
       hello: 'world',
     }
 
-    for (let featureState of ['NOT_LOADED', 'LOADING', 'LOADED', new Error('test')]) {
+    for (let featureState of [
+      'NOT_LOADED',
+      'LOADING',
+      'LOADED',
+      new Error('test'),
+    ]) {
       const Comp = featureLoader({
         featureId: 'test',
       })
@@ -112,7 +120,7 @@ describe('featureLoader', () => {
         },
         features: {
           test: feature,
-        }
+        },
       })
 
       const props = {
@@ -132,7 +140,12 @@ describe('featureLoader', () => {
       hello: 'world',
     }
 
-    for (let featureState of ['NOT_LOADED', 'LOADING', 'LOADED', new Error('test')]) {
+    for (let featureState of [
+      'NOT_LOADED',
+      'LOADING',
+      'LOADED',
+      new Error('test'),
+    ]) {
       const render = sinon.spy(() => <h1>Rendered!</h1>)
       const Comp = featureLoader({
         featureId: 'test',
@@ -145,7 +158,7 @@ describe('featureLoader', () => {
         },
         features: {
           test: feature,
-        }
+        },
       })
 
       const props = {
@@ -158,11 +171,13 @@ describe('featureLoader', () => {
         </Provider>
       )
 
-      expect(render.calledWith({
-        featureState,
-        feature,
-        props,
-      })).to.be.true
+      expect(
+        render.calledWith({
+          featureState,
+          feature,
+          props,
+        })
+      ).to.be.true
 
       expect(comp.text()).to.equal('Rendered!')
     }
@@ -173,7 +188,12 @@ describe('featureLoader', () => {
       hello: 'world',
     }
 
-    for (let featureState of ['NOT_LOADED', 'LOADING', 'LOADED', new Error('test')]) {
+    for (let featureState of [
+      'NOT_LOADED',
+      'LOADING',
+      'LOADED',
+      new Error('test'),
+    ]) {
       const render = sinon.spy(() => null)
       const Comp = featureLoader({
         featureId: 'test',
@@ -188,7 +208,7 @@ describe('featureLoader', () => {
         },
         featureness: {
           test: feature,
-        }
+        },
       })
 
       const props = {
@@ -201,12 +221,13 @@ describe('featureLoader', () => {
         </Provider>
       )
 
-      expect(render.calledWith({
-        featureState,
-        feature,
-        props,
-      })).to.be.true
+      expect(
+        render.calledWith({
+          featureState,
+          feature,
+          props,
+        })
+      ).to.be.true
     }
   })
 })
-

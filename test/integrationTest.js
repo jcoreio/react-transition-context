@@ -1,21 +1,27 @@
 import React from 'react'
-import { sortBy } from "lodash"
-import {renderToString} from 'react-dom/server'
-import {combineReducers, createStore, applyMiddleware} from 'redux'
-import {connect, Provider} from 'react-redux'
-import {mount} from 'enzyme'
-import {configure as configureEnzyme} from 'enzyme'
+import { sortBy } from 'lodash'
+import { renderToString } from 'react-dom/server'
+import { combineReducers, createStore, applyMiddleware } from 'redux'
+import { connect, Provider } from 'react-redux'
+import { mount } from 'enzyme'
+import { configure as configureEnzyme } from 'enzyme'
 import Adapter from 'enzyme-adapter-react-16'
 configureEnzyme({ adapter: new Adapter() })
-import {expect} from 'chai'
+import { expect } from 'chai'
 import {
-  composeReducers, featuresReducer, featureStatesReducer, featureReducersReducer,
-  loadFeatureMiddleware, featureMiddlewaresMiddleware, addFeature, loadInitialFeatures,
+  composeReducers,
+  featuresReducer,
+  featureStatesReducer,
+  featureReducersReducer,
+  loadFeatureMiddleware,
+  featureMiddlewaresMiddleware,
+  addFeature,
+  loadInitialFeatures,
   LOAD_FEATURE,
 } from 'redux-features'
-import {featureLoader, featureComponents, featureContent} from '../src'
-import {Router, Route, Switch} from 'react-router-dom'
-import {createMemoryHistory} from 'history'
+import { featureLoader, featureComponents, featureContent } from '../src'
+import { Router, Route, Switch } from 'react-router-dom'
+import { createMemoryHistory } from 'history'
 
 describe('integration test', () => {
   describe('featureLoader', () => {
@@ -39,21 +45,27 @@ describe('integration test', () => {
             return result
           },
           loadFeatureMiddleware(),
-          featureMiddlewaresMiddleware(),
+          featureMiddlewaresMiddleware()
         )
       )
 
       const counter = {
-        load: (store) => Promise.resolve({
-          reducer: (state, action) => action.type === 'INCREMENT' ? {...state, count: (state.count || 0) + 1} : state,
-          Counter: connect(({count}) => ({count}))(({count}) => <div>{`Counter: ${count || 0}`}</div>),
-        })
+        load: store =>
+          Promise.resolve({
+            reducer: (state, action) =>
+              action.type === 'INCREMENT'
+                ? { ...state, count: (state.count || 0) + 1 }
+                : state,
+            Counter: connect(({ count }) => ({ count }))(({ count }) => (
+              <div>{`Counter: ${count || 0}`}</div>
+            )),
+          }),
       }
       store.dispatch(addFeature('counter', counter))
 
       const Counter = featureLoader({
         featureId: 'counter',
-        render({featureState, feature, props}) {
+        render({ featureState, feature, props }) {
           const Comp = feature && feature.Counter
           if (featureState instanceof Error) {
             return <div>Failed to load counter: {featureState.message}</div>
@@ -61,7 +73,7 @@ describe('integration test', () => {
             return <div>Loading counter...</div>
           }
           return <Comp {...props} />
-        }
+        },
       })
 
       const app = (
@@ -74,7 +86,7 @@ describe('integration test', () => {
 
       expect(renderToString(app)).to.match(/Counter: 0/)
 
-      store.dispatch({type: 'INCREMENT'})
+      store.dispatch({ type: 'INCREMENT' })
       expect(renderToString(app)).to.match(/Counter: 1/)
     })
     it('client-side rendering works', async () => {
@@ -93,7 +105,7 @@ describe('integration test', () => {
         {
           featureStates: {
             counter: 'LOADED',
-          }
+          },
         },
         applyMiddleware(
           store => next => action => {
@@ -102,21 +114,27 @@ describe('integration test', () => {
             return result
           },
           loadFeatureMiddleware(),
-          featureMiddlewaresMiddleware(),
+          featureMiddlewaresMiddleware()
         )
       )
 
       const counter = {
-        load: (store) => Promise.resolve({
-          reducer: (state, action) => action.type === 'INCREMENT' ? {...state, count: (state.count || 0) + 1} : state,
-          Counter: connect(({count}) => ({count}))(({count}) => <div>{`Counter: ${count || 0}`}</div>),
-        })
+        load: store =>
+          Promise.resolve({
+            reducer: (state, action) =>
+              action.type === 'INCREMENT'
+                ? { ...state, count: (state.count || 0) + 1 }
+                : state,
+            Counter: connect(({ count }) => ({ count }))(({ count }) => (
+              <div>{`Counter: ${count || 0}`}</div>
+            )),
+          }),
       }
       store.dispatch(addFeature('counter', counter))
 
       const Counter = featureLoader({
         featureId: 'counter',
-        render({featureState, feature, props}) {
+        render({ featureState, feature, props }) {
           const Comp = feature && feature.Counter
           if (featureState instanceof Error) {
             return <div>Failed to load counter: {featureState.message}</div>
@@ -124,7 +142,7 @@ describe('integration test', () => {
             return <div>Loading counter...</div>
           }
           return <Comp {...props} />
-        }
+        },
       })
 
       const app = (
@@ -137,12 +155,12 @@ describe('integration test', () => {
       await Promise.all(featurePromises)
       expect(comp.text()).to.equal('Counter: 0')
 
-      store.dispatch({type: 'INCREMENT'})
+      store.dispatch({ type: 'INCREMENT' })
       expect(comp.text()).to.equal('Counter: 1')
     })
   })
   describe('featureComponents', () => {
-    it('client-side rendering works', async function () {
+    it('client-side rendering works', async function() {
       const reducer = combineReducers({
         features: featuresReducer(),
         featureStates: featureStatesReducer(),
@@ -152,15 +170,12 @@ describe('integration test', () => {
 
       const dog = {
         index: 1,
-        animals: <div>Dog</div>
+        animals: <div>Dog</div>,
       }
-      const Tiger = ({adjective}) => <div>{adjective} Tiger</div>
+      const Tiger = ({ adjective }) => <div>{adjective} Tiger</div>
       const cats = {
         index: 0,
-        animals: [
-          <div key={0}>Lion</div>,
-          Tiger,
-        ],
+        animals: [<div key={0}>Lion</div>, Tiger],
       }
       store.dispatch(addFeature('dog', dog))
       store.dispatch(addFeature('cats', cats))
@@ -173,7 +188,9 @@ describe('integration test', () => {
 
       const app = (
         <Provider store={store}>
-          <Animals adjective="big" />
+          <div>
+            <Animals adjective="big" />
+          </div>
         </Provider>
       )
       const comp = mount(app)
@@ -197,7 +214,7 @@ describe('integration test', () => {
     })
   })
   describe('featureContent', () => {
-    it('works with react-router', async function () {
+    it('works with react-router', async function() {
       const reducer = combineReducers({
         features: featuresReducer(),
         featureStates: featureStatesReducer(),
@@ -220,13 +237,11 @@ describe('integration test', () => {
       )
 
       const userViewFeature = {
-        rootRoutes: (
-          <Route path="/users/:userId" component={UserView} />
-        ),
+        rootRoutes: <Route path="/users/:userId" component={UserView} />,
       }
 
       const UserProfileView = () => <h3>Profile</h3>
-      const ProfileRoute = ({match}) => (
+      const ProfileRoute = ({ match }) => (
         <Route path={`${match.url}/profile`} component={UserProfileView} />
       )
       const userProfileViewFeature = {
@@ -236,9 +251,12 @@ describe('integration test', () => {
       const ChangePasswordView = () => <h3>Change Password</h3>
       const UserOrdersView = () => <h3>Orders</h3>
       const otherUserRoutesFeature = {
-        userViewRoutes: ({match}) => [
+        userViewRoutes: ({ match }) => [
           /* eslint-disable react/jsx-key */
-          <Route path={`${match.url}/changePassword`} component={ChangePasswordView} />,
+          <Route
+            path={`${match.url}/changePassword`}
+            component={ChangePasswordView}
+          />,
           <Route path={`${match.url}/orders`} component={UserOrdersView} />,
           /* eslint-enable react/jsx-key */
         ],
@@ -256,15 +274,12 @@ describe('integration test', () => {
       const app = (
         <Provider store={store}>
           <Router history={history}>
-            <Route render={props =>
-              (<RootRoutes {...props}>
-                {routes =>
-                  (<Switch>
-                    {routes}
-                  </Switch>)
-                }
-              </RootRoutes>)
-            }
+            <Route
+              render={props => (
+                <RootRoutes {...props}>
+                  {routes => <Switch>{routes}</Switch>}
+                </RootRoutes>
+              )}
             />
           </Router>
         </Provider>
@@ -277,4 +292,3 @@ describe('integration test', () => {
     })
   })
 })
-
