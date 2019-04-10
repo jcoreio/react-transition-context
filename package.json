@@ -1,7 +1,7 @@
 {
-  "name": "react-library-skeleton",
+  "name": "react-redux-features",
   "version": "0.0.0-development",
-  "description": "my personal skeleton for React library NPM packages",
+  "description": "React components for redux-features",
   "main": "index.js",
   "module": "es/index.js",
   "modules.root": "es",
