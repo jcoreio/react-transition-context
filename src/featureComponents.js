@@ -50,7 +50,7 @@ export default function featureComponents<S, A, P: Object>(
     return {
       children: children instanceof Function
         ? children(renderedComponents)
-        : <div>{renderedComponents}</div>,
+        : <React.Fragment>{renderedComponents}</React.Fragment>,
     }
   }
 
