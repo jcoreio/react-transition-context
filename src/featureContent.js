@@ -48,7 +48,7 @@ export default function featureContent<S, A, P: Object>(
     return {
       children: children instanceof Function
         ? children(content)
-        : <div>{content}</div>,
+        : <React.Fragment>{content}</React.Fragment>,
     }
   }
 
