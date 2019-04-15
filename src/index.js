@@ -137,12 +137,15 @@ const TransitionContext = ({
     }
   }, [])
 
-  const content =
+  const rawContent =
     typeof children === 'function' ? children(nextState) : children
+  const content = rawContent != null ? rawContent : <React.Fragment />
+
+  if (nextState === parentState) return content
 
   return (
     <BaseTransitionContext.Provider value={nextState}>
-      {content != null ? content : <React.Fragment />}
+      {content}
     </BaseTransitionContext.Provider>
   )
 }
