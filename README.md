@@ -8,6 +8,21 @@
 
 Helps you deal with nested transitions
 
+```
+npm install --save-dev react-transition-context
+```
+
+# Table of Contents
+
+<!-- toc -->
+
+- [Introduction](#introduction)
+- [`TransitionState` enum](#transitionstate-enum)
+- [Overall transition state](#overall-transition-state)
+- [`TransitionContext` component](#transitioncontext-component)
+
+<!-- tocstop -->
+
 # Introduction
 
 These days it's fairly easy to animate transitions between your app routes using
@@ -31,4 +46,91 @@ both put use it to put their transition state on React context, the
 `/users/:userId` form can register a listener to get called when it's fully
 **in** (rather than mounted but **appearing** or **entering**).
 
-# The rest of the docs are a work in progress
+# `TransitionState` enum
+
+There are five possible values:
+
+- `'appearing'`
+- `'entering'`
+- `'in'`
+- `'leaving'`
+- `'out'`
+
+# Overall transition state
+
+The _overall transition state_ takes into account both a transition component's
+own transition state, and the overall transition state of its closest ancestor
+transition component.
+
+For example:
+
+- If the ancestor is `'in'` and the descendant is `'entering'`, the overall transition state is `'entering'`.
+- If the ancestor is `'leaving'` and the descendant is 'entering', the overall transition state is `'leaving'`.
+- If the ancestor is `'out'` and the descendant is 'leaving', the overall transition state is `'out'`.
+
+## Table
+
+| ↓ Ancestor / Descendant → | `null`        | `'appearing'` | `'entering'`  | `'in'`        | `'leaving'` | `'out'` |
+| :------------------------ | :------------ | :------------ | :------------ | :------------ | :---------- | ------- |
+| `null`                    | **`'in'`**    | `'appearing'` | `'entering'`  | **`'in'`**    | `'leaving'` | `'out'` |
+| `'appearing'`             | `'appearing'` | `'appearing'` | `'appearing'` | `'appearing'` | `'leaving'` | `'out'` |
+| `'entering'`              | `'entering'`  | `'appearing'` | `'entering'`  | `'entering'`  | `'leaving'` | `'out'` |
+| `'in'`                    | `'in'`        | `'appearing'` | `'entering'`  | **`'in'`**    | `'leaving'` | `'out'` |
+| `'leaving'`               | `'leaving'`   | `'leaving'`   | `'leaving'`   | `'leaving'`   | `'leaving'` | `'out'` |
+| `'out'`                   | `'out'`       | `'out'`       | `'out'`       | `'out'`       | `'out'`     | `'out'` |
+
+# `TransitionContext` component
+
+```js
+import TransitionContext from 'react-transition-context'
+```
+
+## Props
+
+### `transitionState: TransitionState` (_optional_)
+
+The transition state of your transition component that is rendering this.
+Omit this if you just want to consume the [overall transition state](#overall-transition-state) without
+changing the value for descendants.
+
+### `children: React.Node | (TransitionState) => ?React.Node` (_optional_)
+
+The content to render. If you pass a function, it will
+be called with the [overall transition state](#overall-transition-state) and its return value will be rendered.
+
+### `onTransition: (prevState: TransitionState, nextState: TransitionState) => any` (_optional_)
+
+Listener that will be called whenever the [overall transition state](#overall-transition-state)
+changes with the old and new values.
+
+### `willComeIn: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'appearing'`/`'entering'`
+
+### `didComeIn: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) is `'in'` upon mount, or if it changes from `'appearing'`/`'entering'` to `'in'`
+
+### `willAppear: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'appearing'`/`'entering'`
+
+### `didAppear: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'appearing'` to `'in'`
+
+### `willEnter: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'entering'`/`'entering'`
+
+### `didEnter: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'entering'` to `'in'`
+
+### `willLeave: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'in'`/`'appearing'`/`'entering'` to `'leaving'`
+
+### `didLeave: () => any` (_optional_)
+
+Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'leaving'` to `'out'`
