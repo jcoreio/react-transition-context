@@ -1,7 +1,7 @@
 {
-  "name": "react-library-skeleton",
+  "name": "react-transition-context",
   "version": "0.0.0-development",
-  "description": "my personal skeleton for React library NPM packages",
+  "description": "listen for entering/leaving inside nested transitions",
   "main": "index.js",
   "module": "es/index.js",
   "sideEffects": false,
@@ -67,19 +67,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jedwards1211/react-library-skeleton.git"
+    "url": "git+https://github.com/jedwards1211/react-transition-context.git"
   },
   "keywords": [
-    "es2015",
     "react",
-    "skeleton"
+    "transitions",
+    "nested-transitions"
   ],
   "author": "Andy Edwards",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jedwards1211/react-library-skeleton/issues"
+    "url": "https://github.com/jedwards1211/react-transition-context/issues"
   },
-  "homepage": "https://github.com/jedwards1211/react-library-skeleton#readme",
+  "homepage": "https://github.com/jedwards1211/react-transition-context#readme",
   "devDependencies": {
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
@@ -106,6 +106,7 @@
     "codecov": "^3.1.0",
     "copy": "^0.3.2",
     "cross-env": "^5.2.0",
+    "delay": "^4.2.0",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.7.1",
     "eslint": "^5.9.0",
@@ -125,10 +126,11 @@
     "nyc": "^13.1.0",
     "prettier": "^1.15.2",
     "prettier-eslint": "^8.8.2",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "rimraf": "^2.6.0",
-    "semantic-release": "^15.1.4"
+    "semantic-release": "^15.1.4",
+    "sinon": "^7.3.1"
   },
   "dependencies": {
     "@babel/runtime": "^7.1.5",
