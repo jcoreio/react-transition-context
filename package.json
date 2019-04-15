@@ -67,7 +67,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jcoreio/react-transition-context.git"
+    "url": "https://github.com/jcoreio/react-transition-context.git"
   },
   "keywords": [
     "react",
@@ -129,7 +129,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "rimraf": "^2.6.0",
-    "semantic-release": "^15.1.4",
+    "semantic-release": "^15.13.3",
     "sinon": "^7.3.1"
   },
   "dependencies": {
