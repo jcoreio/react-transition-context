@@ -1,4 +1,5 @@
 // @flow
+/* eslint-env browser */
 
 import { describe, it } from 'mocha'
 import * as React from 'react'
@@ -7,521 +8,720 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import delay from 'delay'
 
-import TransitionContext from '../src'
+import {
+  TransitionContext,
+  useAppearingEffect,
+  useEnteringEffect,
+  useAppearedEffect,
+  useEnteredEffect,
+  useCameInEffect,
+  useLeavingEffect,
+  useLeftEffect,
+  useAutofocusRef,
+  type TransitionState,
+} from '../src'
 
-describe('TransitionContext', () => {
-  describe('by itself', () => {
-    it(`calls child function with in state if no state given`, function() {
-      const render = sinon.spy(() => 'test')
-      const comp = mount(
-        <div>
-          <TransitionContext>{render}</TransitionContext>
-        </div>
-      )
-      expect(comp.text()).to.equal('test')
-      expect(render.args).to.deep.equal([['in']])
-    })
-    it('calls didComeIn if in during mount', async (): Promise<void> => {
-      const didComeIn = sinon.spy()
+describe('useCameInEffect', () => {
+  it('runs on mount if not enclosed', async (): Promise<void> => {
+    const didComeIn = sinon.spy()
 
-      mount(<TransitionContext transitionState="in" didComeIn={didComeIn} />)
-      await delay(30)
-      expect(didComeIn.called).to.be.true
-    })
-    it(`doesn't call didComeIn if not in during mount`, async (): Promise<void> => {
-      const didComeIn = sinon.spy()
+    const Test = (): React.Node => {
+      useCameInEffect(didComeIn)
+      return <div />
+    }
 
-      mount(
-        <TransitionContext transitionState="entering" didComeIn={didComeIn} />
-      )
-      await delay(30)
-      expect(didComeIn.called).to.be.false
-    })
-    it('calls willLeave if in during unmount', async (): Promise<void> => {
-      const willLeave = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in" willLeave={willLeave} />
-      )
-      expect(willLeave.called).to.be.false
-
-      comp.unmount()
-      await delay(30)
-      expect(willLeave.called).to.be.true
-    })
-    it(`doesn't call willLeave if not in during unmount`, async (): Promise<void> => {
-      const willLeave = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="leaving" willLeave={willLeave} />
-      )
-      expect(willLeave.called).to.be.false
-
-      comp.unmount()
-      await delay(30)
-      expect(willLeave.called).to.be.false
-    })
-    it(`calls onTransition after transitionState changes`, async function(): Promise<void> {
-      const onTransition = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext
-          transitionState="entering"
-          onTransition={onTransition}
-        />
-      )
-      expect(onTransition.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" onTransition={onTransition} />
-            .props
-        )
-        .update()
-
-      await delay(30)
-      expect(onTransition.args).to.deep.equal([['entering', 'in']])
-
-      onTransition.resetHistory()
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="leaving"
-              onTransition={onTransition}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(onTransition.args).to.deep.equal([['in', 'leaving']])
-
-      onTransition.resetHistory()
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="out"
-              onTransition={onTransition}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(onTransition.args).to.deep.equal([['leaving', 'out']])
-    })
-    it(`calls willComeIn when state changes from out to entering`, async function(): Promise<void> {
-      const willComeIn = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="out" willComeIn={willComeIn} />
-      )
-      expect(willComeIn.called).to.be.false
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="entering"
-              willComeIn={willComeIn}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(willComeIn.called).to.be.true
-    })
-    it(`calls willComeIn when state changes from out to appearing`, async function(): Promise<void> {
-      const willComeIn = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="out" willComeIn={willComeIn} />
-      )
-      expect(willComeIn.called).to.be.false
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="appearing"
-              willComeIn={willComeIn}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(willComeIn.called).to.be.true
-    })
-    it(`doesn't call willComeIn when state changes from out to in`, async function(): Promise<void> {
-      const willComeIn = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="out" willComeIn={willComeIn} />
-      )
-      expect(willComeIn.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" willComeIn={willComeIn} />
-            .props
-        )
-        .update()
-
-      await delay(30)
-      expect(willComeIn.called).to.be.false
-    })
-    it(`calls willEnter when state changes from out to entering`, async function(): Promise<void> {
-      const willEnter = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="out" willEnter={willEnter} />
-      )
-      expect(willEnter.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="entering" willEnter={willEnter} />
-            .props
-        )
-        .update()
-
-      await delay(30)
-      expect(willEnter.called).to.be.true
-    })
-    it(`calls willEnter when state changes from leaving to entering`, async function(): Promise<void> {
-      const willEnter = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="leaving" willEnter={willEnter} />
-      )
-      expect(willEnter.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="entering" willEnter={willEnter} />
-            .props
-        )
-        .update()
-
-      await delay(30)
-      expect(willEnter.called).to.be.true
-    })
-    it(`doesn't call willEnter when state changes from in to entering`, async function(): Promise<void> {
-      const willEnter = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in" willEnter={willEnter} />
-      )
-      expect(willEnter.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="entering" willEnter={willEnter} />
-            .props
-        )
-        .update()
-
-      await delay(30)
-      expect(willEnter.called).to.be.false
-    })
-    it(`calls willAppear when state changes from out to appearing`, async function(): Promise<void> {
-      const willAppear = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="out" willAppear={willAppear} />
-      )
-      expect(willAppear.called).to.be.false
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="appearing"
-              willAppear={willAppear}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(willAppear.called).to.be.true
-    })
-    it(`calls willAppear when state changes from leaving to appearing`, async function(): Promise<void> {
-      const willAppear = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="leaving" willAppear={willAppear} />
-      )
-      expect(willAppear.called).to.be.false
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="appearing"
-              willAppear={willAppear}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(willAppear.called).to.be.true
-    })
-    it(`doesn't call willAppear when state changes from in to appearing`, async function(): Promise<void> {
-      const willAppear = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in" willAppear={willAppear} />
-      )
-      expect(willAppear.called).to.be.false
-      comp
-        .setProps(
-          (
-            <TransitionContext
-              transitionState="appearing"
-              willAppear={willAppear}
-            />
-          ).props
-        )
-        .update()
-
-      await delay(30)
-      expect(willAppear.called).to.be.false
-    })
-    it(`calls didEnter when state changes from entering to in`, async function(): Promise<void> {
-      const didEnter = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="entering" didEnter={didEnter} />
-      )
-      expect(didEnter.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" didEnter={didEnter} />.props
-        )
-        .update()
-
-      await delay(30)
-      expect(didEnter.called).to.be.true
-    })
-    it(`doesn't call didEnter when state changes from appearing to in`, async function(): Promise<void> {
-      const didEnter = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="appearing" didEnter={didEnter} />
-      )
-      expect(didEnter.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" didEnter={didEnter} />.props
-        )
-        .update()
-
-      await delay(30)
-      expect(didEnter.called).to.be.false
-    })
-    it(`calls didAppear when state changes from appearing to in`, async function(): Promise<void> {
-      const didAppear = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="appearing" didAppear={didAppear} />
-      )
-      expect(didAppear.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" didAppear={didAppear} />.props
-        )
-        .update()
-
-      await delay(30)
-      expect(didAppear.called).to.be.true
-    })
-    it(`doesn't call didAppear when state changes from entering to in`, async function(): Promise<void> {
-      const didAppear = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="entering" didAppear={didAppear} />
-      )
-      expect(didAppear.called).to.be.false
-      comp
-        .setProps(
-          <TransitionContext transitionState="in" didAppear={didAppear} />.props
-        )
-        .update()
-
-      await delay(30)
-      expect(didAppear.called).to.be.false
-    })
+    mount(<Test />)
+    await delay(30)
+    expect(didComeIn.called).to.be.true
   })
-  describe(`nested`, function() {
-    it(`calls child function with overall transitionState`, function() {
-      const render = sinon.spy(() => 'test')
+  it('runs on mount if transition is in', async (): Promise<void> => {
+    const didComeIn = sinon.spy()
 
-      const comp = mount(
-        <div>
-          <TransitionContext transitionState="entering">
-            <TransitionContext transitionState="in">{render}</TransitionContext>
+    const Test = (): React.Node => {
+      useCameInEffect(didComeIn)
+      return <div />
+    }
+
+    mount(
+      <TransitionContext state="in">
+        <Test />
+      </TransitionContext>
+    )
+    await delay(30)
+    expect(didComeIn.called).to.be.true
+  })
+  ;['out', 'leaving', 'appearing', 'entering'].forEach(
+    (state: TransitionState) => {
+      const testcase = (
+        render: (React.Node, state: TransitionState) => React.Node
+      ) => async (): Promise<void> => {
+        const didComeIn = sinon.spy()
+
+        const Test = (): React.Node => {
+          useCameInEffect(didComeIn)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(didComeIn.called).to.be.false
+
+        comp.setProps((render(<Test />, 'in'): any).props).update()
+        await delay(30)
+        expect(didComeIn.called).to.be.true
+      }
+      it(
+        `runs when transition state changes to from ${state} to in`,
+        testcase((children, state: TransitionState) => (
+          <TransitionContext state={state}>{children}</TransitionContext>
+        ))
+      )
+      it(
+        `runs when overall transition state changes from ${state} to in (from ancestor)`,
+        testcase((children, state: TransitionState) => (
+          <TransitionContext state={state}>
+            <TransitionContext state="in">{children}</TransitionContext>
           </TransitionContext>
-        </div>
+        ))
       )
-
-      expect(comp.text()).to.equal('test')
-      expect(render.args).to.deep.equal([['entering']])
-
-      render.resetHistory()
-      const comp2 = mount(
-        <div>
-          <TransitionContext transitionState="in">
-            <TransitionContext transitionState="leaving">
-              {render}
-            </TransitionContext>
+      it(
+        `runs when overall transition state changes from ${state} to in (from descendant)`,
+        testcase((children, state: TransitionState) => (
+          <TransitionContext state="in">
+            <TransitionContext state={state}>{children}</TransitionContext>
           </TransitionContext>
-        </div>
+        ))
       )
+    }
+  )
+})
+describe(`useAppearingEffect`, function() {
+  it('runs on mount if transition is appearing', async (): Promise<void> => {
+    const effect = sinon.spy()
 
-      expect(comp2.text()).to.equal('test')
-      expect(render.args).to.deep.equal([['leaving']])
+    const Test = (): React.Node => {
+      useAppearingEffect(effect)
+      return <div />
+    }
 
-      render.resetHistory()
-      const comp3 = mount(
-        <div>
-          <TransitionContext transitionState="entering">
-            <TransitionContext>{render}</TransitionContext>
-          </TransitionContext>
-        </div>
-      )
+    mount(
+      <TransitionContext state="appearing">
+        <Test />
+      </TransitionContext>
+    )
+    await delay(30)
+    expect(effect.called).to.be.true
+  })
+  ;['out', 'leaving'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
 
-      expect(comp3.text()).to.equal('test')
-      expect(render.args).to.deep.equal([['entering']])
-    })
-    it('calls didComeIn when parent changes from entering to in', async (): Promise<void> => {
-      const didComeIn = sinon.spy()
+      const Test = (): React.Node => {
+        useAppearingEffect(effect)
+        return <div />
+      }
 
-      const comp = mount(
-        <TransitionContext transitionState="entering">
-          <TransitionContext transitionState="in" didComeIn={didComeIn} />
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'appearing'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.true
+    }
+    it(
+      `runs when transition state changes from ${state} to appearing`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `runs when overall transition state changes from ${state} to appearing (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
         </TransitionContext>
-      )
-      await delay(30)
-      expect(didComeIn.called).to.be.false
-
-      comp
-        .setProps(
-          (
-            <TransitionContext transitionState="in">
-              <TransitionContext transitionState="in" didComeIn={didComeIn} />
-            </TransitionContext>
-          ).props
-        )
-        .update()
-      await delay(30)
-      expect(didComeIn.called).to.be.true
-    })
-    it('calls didComeIn when parent is in and child changes from entering to in', async (): Promise<void> => {
-      const didComeIn = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in">
-          <TransitionContext transitionState="entering" didComeIn={didComeIn} />
+      ))
+    )
+    it(
+      `runs when overall transition state changes from ${state} to appearing (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
         </TransitionContext>
-      )
-      await delay(30)
-      expect(didComeIn.called).to.be.false
+      ))
+    )
+  })
+  ;['in', 'entering'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
 
-      comp
-        .setProps(
-          (
-            <TransitionContext transitionState="in">
-              <TransitionContext transitionState="in" didComeIn={didComeIn} />
-            </TransitionContext>
-          ).props
-        )
-        .update()
-      await delay(30)
-      expect(didComeIn.called).to.be.true
-    })
-    it(`doesn't call didComeIn when child changes from entering to in but parent is out`, async (): Promise<void> => {
-      const didComeIn = sinon.spy()
+      const Test = (): React.Node => {
+        useAppearingEffect(effect)
+        return <div />
+      }
 
-      const comp = mount(
-        <TransitionContext transitionState="out">
-          <TransitionContext transitionState="entering" didComeIn={didComeIn} />
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'appearing'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+    it(
+      `doesn't run when transition state changes from ${state} to appearing`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to appearing (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
         </TransitionContext>
-      )
-      await delay(30)
-      expect(didComeIn.called).to.be.false
-
-      comp
-        .setProps(
-          (
-            <TransitionContext transitionState="out">
-              <TransitionContext transitionState="in" didComeIn={didComeIn} />
-            </TransitionContext>
-          ).props
-        )
-        .update()
-      await delay(30)
-      expect(didComeIn.called).to.be.false
-    })
-    it('calls willLeave when parent changes from in to leaving', async (): Promise<void> => {
-      const willLeave = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in">
-          <TransitionContext transitionState="in" willLeave={willLeave} />
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to appearing (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
         </TransitionContext>
-      )
-      await delay(30)
-      expect(willLeave.called).to.be.false
+      ))
+    )
+  })
+})
+describe(`useEnteringEffect`, function() {
+  it('runs on mount if transition is entering', async (): Promise<void> => {
+    const effect = sinon.spy()
 
-      comp
-        .setProps(
-          (
-            <TransitionContext transitionState="leaving">
-              <TransitionContext transitionState="in" willLeave={willLeave} />
-            </TransitionContext>
-          ).props
-        )
-        .update()
-      await delay(30)
-      expect(willLeave.called).to.be.true
-    })
-    it('calls didLeave when parent changes from leaving to out', async (): Promise<void> => {
-      const didLeave = sinon.spy()
+    const Test = (): React.Node => {
+      useEnteringEffect(effect)
+      return <div />
+    }
 
-      const comp = mount(
-        <TransitionContext transitionState="leaving">
-          <TransitionContext transitionState="leaving" didLeave={didLeave} />
+    mount(
+      <TransitionContext state="entering">
+        <Test />
+      </TransitionContext>
+    )
+    await delay(30)
+    expect(effect.called).to.be.true
+  })
+  ;['out', 'leaving'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useEnteringEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'entering'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.true
+    }
+    it(
+      `runs when transition state changes from ${state} to entering`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `runs when overall transition state changes from ${state} to entering (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
         </TransitionContext>
-      )
-      await delay(30)
-      expect(didLeave.called).to.be.false
-
-      comp
-        .setProps(
-          (
-            <TransitionContext transitionState="out">
-              <TransitionContext
-                transitionState="leaving"
-                didLeave={didLeave}
-              />
-            </TransitionContext>
-          ).props
-        )
-        .update()
-      await delay(30)
-      expect(didLeave.called).to.be.true
-    })
-    it('calls willLeave when tree unmounts', async (): Promise<void> => {
-      const willLeave = sinon.spy()
-
-      const comp = mount(
-        <TransitionContext transitionState="in">
-          <TransitionContext transitionState="in" willLeave={willLeave} />
+      ))
+    )
+    it(
+      `runs when overall transition state changes from ${state} to entering (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
         </TransitionContext>
-      )
+      ))
+    )
+  })
+  ;['in', 'appearing'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useEnteringEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, state))
       await delay(30)
-      expect(willLeave.called).to.be.false
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'entering'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+    it(
+      `doesn't run when transition state changes from ${state} to entering`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to entering (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to entering (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+})
+describe(`useAppearedEffect`, function() {
+  const testcase = (
+    render: (React.Node, state: TransitionState) => React.Node
+  ) => async (): Promise<void> => {
+    const effect = sinon.spy()
+
+    const Test = (): React.Node => {
+      useAppearedEffect(effect)
+      return <div />
+    }
+
+    const comp = mount(render(<Test />, 'appearing'))
+    await delay(30)
+    expect(effect.called).to.be.false
+
+    comp.setProps((render(<Test />, 'in'): any).props).update()
+    await delay(30)
+    expect(effect.called).to.be.true
+  }
+  it(
+    `runs when transition state changes from appearing to in`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>{children}</TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from appearing to in (from ancestor)`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>
+        <TransitionContext state="in">{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from appearing to in (from descendant)`,
+    testcase((children, state) => (
+      <TransitionContext state="in">
+        <TransitionContext state={state}>{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  ;['out', 'leaving', 'entering'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useAppearedEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'in'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+    it(
+      `doesn't run when transition state changes from ${state} to in`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to in (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to in (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+})
+describe(`useEnteredEffect`, function() {
+  const testcase = (
+    render: (React.Node, state: TransitionState) => React.Node
+  ) => async (): Promise<void> => {
+    const effect = sinon.spy()
+
+    const Test = (): React.Node => {
+      useEnteredEffect(effect)
+      return <div />
+    }
+
+    const comp = mount(render(<Test />, 'entering'))
+    await delay(30)
+    expect(effect.called).to.be.false
+
+    comp.setProps((render(<Test />, 'in'): any).props).update()
+    await delay(30)
+    expect(effect.called).to.be.true
+  }
+  it(
+    `runs when transition state changes from entering to in`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>{children}</TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from entering to in (from ancestor)`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>
+        <TransitionContext state="in">{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from entering to in (from descendant)`,
+    testcase((children, state) => (
+      <TransitionContext state="in">
+        <TransitionContext state={state}>{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  ;['out', 'leaving', 'appearing'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useEnteredEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'in'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+    it(
+      `doesn't run when transition state changes from ${state} to in`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to in (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to in (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+})
+describe(`useLeavingEffect`, function() {
+  it(`runs on unmount when unenclosed`, async function(): Promise<void> {
+    const effect = sinon.spy()
+
+    const Test = (): React.Node => {
+      useLeavingEffect(effect)
+      return <div />
+    }
+
+    const comp = mount(<Test />)
+    await delay(30)
+    expect(effect.called).to.be.false
+
+    comp.unmount()
+    await delay(30)
+    expect(effect.called).to.be.true
+  })
+  ;['in', 'entering', 'appearing'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: React.Node => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useLeavingEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />))
+      await delay(30)
+      expect(effect.called).to.be.false
 
       comp.unmount()
       await delay(30)
-      expect(willLeave.called).to.be.true
-    })
+      expect(effect.called).to.be.true
+    }
+
+    it(
+      `runs on unmount when transition is ${state}`,
+      testcase(children => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `runs on unmount when overall transition state is ${state} (from ancestor)`,
+      testcase(children => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `runs on unmount when overall transition state is ${state} (from descendant)`,
+      testcase(children => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+  ;['out', 'leaving'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: React.Node => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useLeavingEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.unmount()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+
+    it(
+      `doesn't run on unmount when transition is ${state}`,
+      testcase(children => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run on unmount when overall transition state is ${state} (from ancestor)`,
+      testcase(children => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run on on unmount when overall transition state is ${state} (from descendant)`,
+      testcase(children => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+})
+describe(`useLeftEffect`, function() {
+  const testcase = (
+    render: (React.Node, state: TransitionState) => React.Node
+  ) => async (): Promise<void> => {
+    const effect = sinon.spy()
+
+    const Test = (): React.Node => {
+      useLeftEffect(effect)
+      return <div />
+    }
+
+    const comp = mount(render(<Test />, 'leaving'))
+    await delay(30)
+    expect(effect.called).to.be.false
+
+    comp.setProps((render(<Test />, 'out'): any).props).update()
+    await delay(30)
+    expect(effect.called).to.be.true
+  }
+  it(
+    `runs when transition state changes from leaving to out`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>{children}</TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from leaving to out (from ancestor)`,
+    testcase((children, state) => (
+      <TransitionContext state={state}>
+        <TransitionContext state="in">{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  it(
+    `runs when overall transition state changes from leaving to out (from descendant)`,
+    testcase((children, state) => (
+      <TransitionContext state="in">
+        <TransitionContext state={state}>{children}</TransitionContext>
+      </TransitionContext>
+    ))
+  )
+  ;['in', 'appearing', 'entering'].forEach((state: TransitionState) => {
+    const testcase = (
+      render: (React.Node, state: TransitionState) => React.Node
+    ) => async (): Promise<void> => {
+      const effect = sinon.spy()
+
+      const Test = (): React.Node => {
+        useAppearedEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, state))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'out'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.false
+    }
+    it(
+      `doesn't run when transition state changes from ${state} to out`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>{children}</TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to out (from ancestor)`,
+      testcase((children, state) => (
+        <TransitionContext state={state}>
+          <TransitionContext state="in">{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+    it(
+      `doesn't run when overall transition state changes from ${state} to out (from descendant)`,
+      testcase((children, state) => (
+        <TransitionContext state="in">
+          <TransitionContext state={state}>{children}</TransitionContext>
+        </TransitionContext>
+      ))
+    )
+  })
+})
+describe(`useAutofocusRef`, function() {
+  beforeEach(() => {
+    if (document.activeElement) document.activeElement.blur()
+  })
+  it(`does nothing when ref is not used`, async function(): Promise<void> {
+    const Test = (): React.Node => {
+      useAutofocusRef()
+      return <button id="foo" />
+    }
+
+    mount(<Test />)
+    await delay(30)
+  })
+  it(`autofocuses button on mount when not enclosed`, async function(): Promise<void> {
+    const Test = (): React.Node => {
+      const ref = useAutofocusRef()
+      return <button id="foo" ref={ref} />
+    }
+
+    mount(<Test />)
+    await delay(30)
+    const { activeElement } = document
+    if (!(activeElement instanceof HTMLButtonElement)) {
+      throw new Error('expected activeElement to be an HTMLButtonElement')
+    }
+    expect(activeElement.id).to.equal('foo')
+  })
+  it(`autofocuses input on mount when not enclosed`, async function(): Promise<void> {
+    const Test = (): React.Node => {
+      const ref = useAutofocusRef()
+      return <input value="test" id="foo" ref={ref} />
+    }
+
+    mount(<Test />)
+    await delay(30)
+    const { activeElement } = document
+    if (!(activeElement instanceof HTMLInputElement)) {
+      throw new Error('expected activeElement to be an HTMLInputElement')
+    }
+    expect(activeElement.id).to.equal('foo')
+    expect(activeElement.selectionStart).to.equal(0)
+    expect(activeElement.selectionEnd).to.equal(4)
+  })
+  it(`autofocuses input when overall transition state changes to in`, async function(): Promise<void> {
+    const Test = (): React.Node => {
+      const ref = useAutofocusRef()
+      return <input value="test" id="foo" ref={ref} />
+    }
+
+    const comp = mount(
+      <TransitionContext state="entering">
+        <Test />
+      </TransitionContext>
+    )
+    await delay(30)
+    expect(document.activeElement && document.activeElement.id).not.to.equal(
+      'foo'
+    )
+
+    comp.setProps({ state: 'in' }).update()
+    await delay(30)
+    const { activeElement } = document
+    if (!(activeElement instanceof HTMLInputElement)) {
+      throw new Error('expected activeElement to be an HTMLInputElement')
+    }
+    expect(activeElement.id).to.equal('foo')
+    expect(activeElement.selectionStart).to.equal(0)
+    expect(activeElement.selectionEnd).to.equal(4)
   })
 })

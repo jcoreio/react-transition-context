@@ -4,150 +4,131 @@
  */
 
 import * as React from 'react'
+import { useContext, useEffect, useRef } from 'react'
 
-type TransitionState = 'out' | 'in' | 'appearing' | 'entering' | 'leaving'
+export type TransitionState =
+  | 'out'
+  | 'in'
+  | 'appearing'
+  | 'entering'
+  | 'leaving'
 
 const BaseTransitionContext: React.Context<TransitionState> = React.createContext(
   'in'
 )
 
+export function useTransitionContext(): TransitionState {
+  return useContext(BaseTransitionContext)
+}
+
+const priority: Array<TransitionState> = [
+  'out',
+  'leaving',
+  'appearing',
+  'entering',
+]
+
 export function overallTransitionState(
   parentState: TransitionState,
-  childState: ?TransitionState
+  childState: TransitionState
 ): TransitionState {
-  if (!childState) return parentState
-  if (parentState === 'out' || childState === 'out') return 'out'
-  if (parentState === 'leaving' || childState === 'leaving') return 'leaving'
-  if (parentState === 'appearing' || childState === 'appearing')
-    return 'appearing'
-  if (parentState === 'entering' || childState === 'entering') return 'entering'
+  for (let state of priority) {
+    if (parentState === state || childState === state) return state
+  }
   return childState
 }
 
-type OnTransition = (
-  prevState: TransitionState,
-  nextState: TransitionState
-) => any
-
 export type Props = {
-  transitionState?: ?TransitionState,
-  children?: ?(React.Node | (TransitionState => ?React.Node)),
-  onTransition?: ?OnTransition,
-  willComeIn?: ?Function,
-  didComeIn?: ?Function,
-  willAppear?: ?Function,
-  didAppear?: ?Function,
-  willEnter?: ?Function,
-  didEnter?: ?Function,
-  willLeave?: ?Function,
-  didLeave?: ?Function,
+  state: TransitionState,
+  children: React.Node,
 }
 
-export type Stash = {
-  prevState?: ?TransitionState,
-  onTransition: (
-    prevState: ?TransitionState,
-    nextState: TransitionState
-  ) => any,
-}
-
-const TransitionContext = ({
-  transitionState,
-  children,
-  onTransition,
-  willComeIn,
-  didComeIn,
-  willAppear,
-  didAppear,
-  willEnter,
-  didEnter,
-  willLeave,
-  didLeave,
-}: Props) => {
-  const parentState = React.useContext(BaseTransitionContext)
-  const nextState = overallTransitionState(parentState, transitionState)
-
-  const stash: Stash = (React.useRef({
-    onTransition:
-      // istanbul ignore next
-      () => {},
-  }).current: any)
-  stash.onTransition = (
-    prevState: ?TransitionState,
-    nextState: TransitionState
-  ) => {
-    if (prevState && onTransition) onTransition(prevState, nextState)
-
-    switch (nextState) {
-      case 'out':
-        if (prevState === 'leaving') {
-          if (didLeave) didLeave()
-        }
-        break
-      case 'in':
-        if (prevState === 'appearing') {
-          if (didAppear) didAppear()
-        } else if (prevState === 'entering') {
-          if (didEnter) didEnter()
-        }
-        if (didComeIn) didComeIn()
-        break
-      case 'appearing':
-        if (prevState === 'out' || prevState === 'leaving') {
-          if (willAppear) willAppear()
-          if (willComeIn) willComeIn()
-        }
-        break
-      case 'entering':
-        if (prevState === 'out' || prevState === 'leaving') {
-          if (willEnter) willEnter()
-          if (willComeIn) willComeIn()
-        }
-        break
-      case 'leaving':
-        if (
-          prevState === 'in' ||
-          prevState === 'appearing' ||
-          prevState === 'entering'
-        ) {
-          if (willLeave) willLeave()
-        }
-        break
-    }
-  }
-
-  React.useEffect(
-    () => {
-      const { prevState } = stash
-      stash.prevState = nextState
-      stash.onTransition(prevState, nextState)
-    },
-    [nextState]
-  )
-
-  React.useEffect(() => {
-    return () => {
-      if (
-        nextState !== 'leaving' &&
-        nextState !== 'out' &&
-        stash.onTransition
-      ) {
-        stash.onTransition(nextState, 'leaving')
-      }
-    }
-  }, [])
-
-  const rawContent =
-    typeof children === 'function' ? children(nextState) : children
-  const content = rawContent != null ? rawContent : <React.Fragment />
-
-  if (nextState === parentState) return content
-
+export function TransitionContext({ state, children }: Props): React.Node {
+  const parentState = useTransitionContext()
+  const overallState = overallTransitionState(parentState, state)
   return (
-    <BaseTransitionContext.Provider value={nextState}>
-      {content}
+    <BaseTransitionContext.Provider value={overallState}>
+      {children}
     </BaseTransitionContext.Provider>
   )
 }
 
-export default TransitionContext
+function outish(state: ?TransitionState): boolean {
+  return state === 'out' || state === 'leaving'
+}
+
+export type TransitionStateEffect = (
+  prevState: ?TransitionState,
+  nextState: TransitionState
+) => any
+
+export function useTransitionStateEffect(effect: TransitionStateEffect) {
+  const nextState = useTransitionContext()
+  const prevStateRef = useRef(null)
+  const effectRef = useRef(effect)
+  effectRef.current = effect
+
+  useEffect(
+    () => {
+      const prevState = prevStateRef.current
+      const effect: TransitionStateEffect = (effectRef.current: any)
+      prevStateRef.current = nextState
+      effect(prevState, nextState)
+    },
+    [nextState]
+  )
+
+  useEffect(() => {
+    return () => {
+      const effect: TransitionStateEffect = (effectRef.current: any)
+      if (!outish(nextState)) effect(nextState, 'leaving')
+    }
+  }, [])
+}
+
+export function useTransitionStateEffectFilter(
+  filter: (prevState: ?TransitionState, nextState: TransitionState) => boolean
+): TransitionStateEffect => void {
+  return (effect: TransitionStateEffect) =>
+    useTransitionStateEffect(
+      (prevState: ?TransitionState, nextState: TransitionState) => {
+        if (filter(prevState, nextState)) effect(prevState, nextState)
+      }
+    )
+}
+
+export const useAppearingEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) =>
+    outish(prevState || 'out') && nextState === 'appearing'
+)
+export const useEnteringEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) =>
+    outish(prevState || 'out') && nextState === 'entering'
+)
+export const useAppearedEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) => prevState === 'appearing' && nextState === 'in'
+)
+export const useEnteredEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) => prevState === 'entering' && nextState === 'in'
+)
+export const useCameInEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) => nextState === 'in'
+)
+export const useLeavingEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) =>
+    !outish(prevState || 'out') && nextState === 'leaving'
+)
+export const useLeftEffect = useTransitionStateEffectFilter(
+  (prevState, nextState) => prevState === 'leaving' && nextState === 'out'
+)
+export function useAutofocusRef(): React.ElementRef<any> {
+  const ref = useRef()
+  useCameInEffect(() => {
+    const el = ref.current
+    if (el) {
+      el.focus()
+      if (typeof el.select === 'function') el.select()
+    }
+  })
+  return ref
+}

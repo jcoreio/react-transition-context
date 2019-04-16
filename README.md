@@ -19,7 +19,19 @@ npm install --save-dev react-transition-context
 - [Introduction](#introduction)
 - [`TransitionState` enum](#transitionstate-enum)
 - [Overall transition state](#overall-transition-state)
-- [`TransitionContext` component](#transitioncontext-component)
+  - [Table](#table)
+- [API](#api)
+  - [`TransitionContext` component](#transitioncontext-component)
+  - [`useTransitionContext` hook](#usetransitioncontext-hook)
+  - [`useTransitionStateEffect` hook](#usetransitionstateeffect-hook)
+  - [`useAppearingEffect` hook](#useappearingeffect-hook)
+  - [`useAppearedEffect` hook](#useappearedeffect-hook)
+  - [`useEnteringEffect` hook](#useenteringeffect-hook)
+  - [`useEnteredEffect` hook](#useenteredeffect-hook)
+  - [`useCameInEffect` hook](#usecameineffect-hook)
+  - [`useLeavingEffect` hook](#useleavingeffect-hook)
+  - [`useLeftEffect` hook](#uselefteffect-hook)
+  - [`useAutofocusRef` hook](#useautofocusref-hook)
 
 <!-- tocstop -->
 
@@ -43,7 +55,7 @@ transition is going before it focuses an input.
 
 `react-transition-context` solves this problem. If the fade and the drilldown
 both put use it to put their transition state on React context, the
-`/users/:userId` form can register a listener to get called when it's fully
+`/users/:userId` form can register a effect to get called when it's fully
 **in** (rather than mounted but **appearing** or **entering**).
 
 # `TransitionState` enum
@@ -70,67 +82,210 @@ For example:
 
 ## Table
 
-| ↓ Ancestor / Descendant → | `null`        | `'appearing'` | `'entering'`  | `'in'`        | `'leaving'` | `'out'` |
-| :------------------------ | :------------ | :------------ | :------------ | :------------ | :---------- | ------- |
-| `null`                    | **`'in'`**    | `'appearing'` | `'entering'`  | **`'in'`**    | `'leaving'` | `'out'` |
-| `'appearing'`             | `'appearing'` | `'appearing'` | `'appearing'` | `'appearing'` | `'leaving'` | `'out'` |
-| `'entering'`              | `'entering'`  | `'appearing'` | `'entering'`  | `'entering'`  | `'leaving'` | `'out'` |
-| `'in'`                    | `'in'`        | `'appearing'` | `'entering'`  | **`'in'`**    | `'leaving'` | `'out'` |
-| `'leaving'`               | `'leaving'`   | `'leaving'`   | `'leaving'`   | `'leaving'`   | `'leaving'` | `'out'` |
-| `'out'`                   | `'out'`       | `'out'`       | `'out'`       | `'out'`       | `'out'`     | `'out'` |
+| ↓ Ancestor / Descendant → | `'appearing'` | `'entering'`  | `'in'`        | `'leaving'` | `'out'` |
+| :------------------------ | :------------ | :------------ | :------------ | :---------- | ------- |
+| `'appearing'`             | `'appearing'` | `'appearing'` | `'appearing'` | `'leaving'` | `'out'` |
+| `'entering'`              | `'appearing'` | `'entering'`  | `'entering'`  | `'leaving'` | `'out'` |
+| `'in'`                    | `'appearing'` | `'entering'`  | **`'in'`**    | `'leaving'` | `'out'` |
+| `'leaving'`               | `'leaving'`   | `'leaving'`   | `'leaving'`   | `'leaving'` | `'out'` |
+| `'out'`                   | `'out'`       | `'out'`       | `'out'`       | `'out'`     | `'out'` |
 
-# `TransitionContext` component
+# API
+
+## `TransitionContext` component
 
 ```js
-import TransitionContext from 'react-transition-context'
+import { TransitionContext } from 'react-transition-context'
 ```
 
-## Props
+### Props
 
-### `transitionState: TransitionState` (_optional_)
+#### `state: TransitionState` (_optional_)
 
 The transition state of your transition component that is rendering this.
 Omit this if you just want to consume the [overall transition state](#overall-transition-state) without
 changing the value for descendants.
 
-### `children: React.Node | (TransitionState) => ?React.Node` (_optional_)
+#### `children: React.Node` (**required**)
 
-The content to render. If you pass a function, it will
-be called with the [overall transition state](#overall-transition-state) and its return value will be rendered.
+The content to render
 
-### `onTransition: (prevState: TransitionState, nextState: TransitionState) => any` (_optional_)
+## `useTransitionContext` hook
 
-Listener that will be called whenever the [overall transition state](#overall-transition-state)
-changes with the old and new values.
+```js
+import { useTransitionContext } from 'react-transition-context'
+```
 
-### `willComeIn: () => any` (_optional_)
+Hook that returns the [overall transition state](#overall-transition-state) from
+context.
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'appearing'`/`'entering'`
+## `useTransitionStateEffect` hook
 
-### `didComeIn: () => any` (_optional_)
+```js
+import { useTransitionStateEffect } from 'react-transition-context'
+```
 
-Listener that will be called if the [overall transition state](#overall-transition-state) is `'in'` upon mount, or if it changes from `'appearing'`/`'entering'` to `'in'`
+```js
+useTransitionStateEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
 
-### `willAppear: () => any` (_optional_)
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes.
+`prevState` will be `null` for the first call (on mount).
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'appearing'`/`'entering'`
+## `useAppearingEffect` hook
 
-### `didAppear: () => any` (_optional_)
+```js
+import { useAppearingEffect } from 'react-transition-context'
+```
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'appearing'` to `'in'`
+```js
+useAppearingEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
 
-### `willEnter: () => any` (_optional_)
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'out'`/`'leaving'` to `'appearing'`, or is
+`'appearing'` when the component mounts.
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'out'`/`'leaving'` to `'entering'`/`'entering'`
+## `useAppearedEffect` hook
 
-### `didEnter: () => any` (_optional_)
+```js
+import { useAppearedEffect } from 'react-transition-context'
+```
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'entering'` to `'in'`
+```js
+useAppearedEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
 
-### `willLeave: () => any` (_optional_)
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'appearing'` to `'in'`.
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'in'`/`'appearing'`/`'entering'` to `'leaving'`
+## `useEnteringEffect` hook
 
-### `didLeave: () => any` (_optional_)
+```js
+import { useEnteringEffect } from 'react-transition-context'
+```
 
-Listener that will be called if the [overall transition state](#overall-transition-state) changes from `'leaving'` to `'out'`
+```js
+useEnteringEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
+
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'out'`/`'leaving'` to `'entering'`, or is
+`'entering'` when the component mounts.
+
+## `useEnteredEffect` hook
+
+```js
+import { useEnteredEffect } from 'react-transition-context'
+```
+
+```js
+useEnteredEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
+
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'entering'` to `'in'`.
+
+## `useCameInEffect` hook
+
+```js
+import { useCameInEffect } from 'react-transition-context'
+```
+
+```js
+useCameInEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
+
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+to `'in'` (from any other state), or is `'in'` when the
+component mounts.
+
+[`useAutofocusRef`](#useautofocusref-hook) is built on
+top of this.
+
+## `useLeavingEffect` hook
+
+```js
+import { useLeavingEffect } from 'react-transition-context'
+```
+
+```js
+useLeavingEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
+
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'in'`/`'appearing'`/`'entering'` to `'leaving'`,
+or when the component will unmount and the overall
+transition state is `'in'`/`'appearing'`/`'entering'`.
+
+## `useLeftEffect` hook
+
+```js
+import { useLeftEffect } from 'react-transition-context'
+```
+
+```js
+useLeftEffect(
+  effect: (prevState: ?TransitionState, nextState: TransitionState) => any
+)
+```
+
+Calls `effect` whenever the [overall transition state](#overall-transition-state) from context changes
+from `'leaving'` to `'out'`.
+
+## `useAutofocusRef` hook
+
+Creates a ref you can pass to an element to automatically
+focus it when the [component comes in](#usecameineffect-hook)
+
+### Example
+
+```js
+import * as React from 'react'
+import { useAutofocusRef } from 'react-transition-context'
+
+const LoginForm = () => {
+  const autofocusRef = useAutofocusRef()
+  return (
+    <form>
+      <input type="text" name="username" ref={autofocusRef} />
+      <input type="password" name="password" />
+    </form>
+  )
+}
+```
+
+## `useTransitionStateEffectFilter`
+
+```js
+import { useTransitionStateEffectFilter } from 'react-transition-context'
+```
+
+```js
+useTransitionStateEffectFilter: (
+  filter: (prevState: ?TransitionState, nextState: TransitionState) => boolean
+) => (
+  effect: (prevState: ?TransitionState, nextState: TransitionState)
+) => void
+```
+
+A higher-order function that takes a filter function
+and returns a transition state hook that only calls
+`effect` when the `filter` returns truthy.
+
+(`useTransitionStateEffectFilter` is used to create all
+the `useAppearingEffect`, `useLeavingEffect`, etc hooks)
