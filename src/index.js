@@ -13,9 +13,8 @@ export type TransitionState =
   | 'entering'
   | 'leaving'
 
-const BaseTransitionContext: React.Context<TransitionState> = React.createContext(
-  'in'
-)
+const BaseTransitionContext: React.Context<TransitionState> =
+  React.createContext('in')
 
 export function useTransitionContext(): TransitionState {
   return useContext(BaseTransitionContext)
@@ -68,18 +67,15 @@ export function useTransitionStateEffect(effect: TransitionStateEffect) {
   const effectRef = useRef(effect)
   effectRef.current = effect
 
-  useEffect(
-    () => {
-      const prevState = prevStateRef.current
-      const effect: TransitionStateEffect = (effectRef.current: any)
-      prevStateRef.current = nextState
-      effect(prevState, nextState)
-    },
-    [nextState]
-  )
-
   useEffect(() => {
-    return () => {
+    const prevState = prevStateRef.current
+    const effect: TransitionStateEffect = (effectRef.current: any)
+    prevStateRef.current = nextState
+    effect(prevState, nextState)
+  }, [nextState])
+
+  useEffect((): (() => void) => {
+    return (): void => {
       const effect: TransitionStateEffect = (effectRef.current: any)
       if (!outish(nextState)) effect(nextState, 'leaving')
     }
@@ -88,7 +84,7 @@ export function useTransitionStateEffect(effect: TransitionStateEffect) {
 
 export function useTransitionStateEffectFilter(
   filter: (prevState: ?TransitionState, nextState: TransitionState) => boolean
-): TransitionStateEffect => void {
+): (TransitionStateEffect) => void {
   return (effect: TransitionStateEffect) =>
     useTransitionStateEffect(
       (prevState: ?TransitionState, nextState: TransitionState) => {

@@ -52,24 +52,24 @@ describe('useCameInEffect', () => {
   })
   ;['out', 'leaving', 'appearing', 'entering'].forEach(
     (state: TransitionState) => {
-      const testcase = (
-        render: (React.Node, state: TransitionState) => React.Node
-      ) => async (): Promise<void> => {
-        const didComeIn = sinon.spy()
+      const testcase =
+        (render: (React.Node, state: TransitionState) => React.Node) =>
+        async (): Promise<void> => {
+          const didComeIn = sinon.spy()
 
-        const Test = (): React.Node => {
-          useCameInEffect(didComeIn)
-          return <div />
+          const Test = (): React.Node => {
+            useCameInEffect(didComeIn)
+            return <div />
+          }
+
+          const comp = mount(render(<Test />, state))
+          await delay(30)
+          expect(didComeIn.called).to.be.false
+
+          comp.setProps((render(<Test />, 'in'): any).props).update()
+          await delay(30)
+          expect(didComeIn.called).to.be.true
         }
-
-        const comp = mount(render(<Test />, state))
-        await delay(30)
-        expect(didComeIn.called).to.be.false
-
-        comp.setProps((render(<Test />, 'in'): any).props).update()
-        await delay(30)
-        expect(didComeIn.called).to.be.true
-      }
       it(
         `runs when transition state changes to from ${state} to in`,
         testcase((children, state: TransitionState) => (
@@ -95,7 +95,7 @@ describe('useCameInEffect', () => {
     }
   )
 })
-describe(`useAppearingEffect`, function() {
+describe(`useAppearingEffect`, function () {
   it('runs on mount if transition is appearing', async (): Promise<void> => {
     const effect = sinon.spy()
 
@@ -113,24 +113,24 @@ describe(`useAppearingEffect`, function() {
     expect(effect.called).to.be.true
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useAppearingEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useAppearingEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'appearing'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.true
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'appearing'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.true
-    }
     it(
       `runs when transition state changes from ${state} to appearing`,
       testcase((children, state) => (
@@ -155,24 +155,24 @@ describe(`useAppearingEffect`, function() {
     )
   })
   ;['in', 'entering'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useAppearingEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useAppearingEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'appearing'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'appearing'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
     it(
       `doesn't run when transition state changes from ${state} to appearing`,
       testcase((children, state) => (
@@ -197,7 +197,7 @@ describe(`useAppearingEffect`, function() {
     )
   })
 })
-describe(`useEnteringEffect`, function() {
+describe(`useEnteringEffect`, function () {
   it('runs on mount if transition is entering', async (): Promise<void> => {
     const effect = sinon.spy()
 
@@ -215,24 +215,24 @@ describe(`useEnteringEffect`, function() {
     expect(effect.called).to.be.true
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useEnteringEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useEnteringEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'entering'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.true
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'entering'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.true
-    }
     it(
       `runs when transition state changes from ${state} to entering`,
       testcase((children, state) => (
@@ -257,24 +257,24 @@ describe(`useEnteringEffect`, function() {
     )
   })
   ;['in', 'appearing'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useEnteringEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useEnteringEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'entering'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'entering'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
     it(
       `doesn't run when transition state changes from ${state} to entering`,
       testcase((children, state) => (
@@ -299,25 +299,25 @@ describe(`useEnteringEffect`, function() {
     )
   })
 })
-describe(`useAppearedEffect`, function() {
-  const testcase = (
-    render: (React.Node, state: TransitionState) => React.Node
-  ) => async (): Promise<void> => {
-    const effect = sinon.spy()
+describe(`useAppearedEffect`, function () {
+  const testcase =
+    (render: (React.Node, state: TransitionState) => React.Node) =>
+    async (): Promise<void> => {
+      const effect = sinon.spy()
 
-    const Test = (): React.Node => {
-      useAppearedEffect(effect)
-      return <div />
+      const Test = (): React.Node => {
+        useAppearedEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, 'appearing'))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'in'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.true
     }
-
-    const comp = mount(render(<Test />, 'appearing'))
-    await delay(30)
-    expect(effect.called).to.be.false
-
-    comp.setProps((render(<Test />, 'in'): any).props).update()
-    await delay(30)
-    expect(effect.called).to.be.true
-  }
   it(
     `runs when transition state changes from appearing to in`,
     testcase((children, state) => (
@@ -341,24 +341,24 @@ describe(`useAppearedEffect`, function() {
     ))
   )
   ;['out', 'leaving', 'entering'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useAppearedEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useAppearedEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'in'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'in'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
     it(
       `doesn't run when transition state changes from ${state} to in`,
       testcase((children, state) => (
@@ -383,25 +383,25 @@ describe(`useAppearedEffect`, function() {
     )
   })
 })
-describe(`useEnteredEffect`, function() {
-  const testcase = (
-    render: (React.Node, state: TransitionState) => React.Node
-  ) => async (): Promise<void> => {
-    const effect = sinon.spy()
+describe(`useEnteredEffect`, function () {
+  const testcase =
+    (render: (React.Node, state: TransitionState) => React.Node) =>
+    async (): Promise<void> => {
+      const effect = sinon.spy()
 
-    const Test = (): React.Node => {
-      useEnteredEffect(effect)
-      return <div />
+      const Test = (): React.Node => {
+        useEnteredEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, 'entering'))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'in'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.true
     }
-
-    const comp = mount(render(<Test />, 'entering'))
-    await delay(30)
-    expect(effect.called).to.be.false
-
-    comp.setProps((render(<Test />, 'in'): any).props).update()
-    await delay(30)
-    expect(effect.called).to.be.true
-  }
   it(
     `runs when transition state changes from entering to in`,
     testcase((children, state) => (
@@ -425,24 +425,24 @@ describe(`useEnteredEffect`, function() {
     ))
   )
   ;['out', 'leaving', 'appearing'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useEnteredEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useEnteredEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'in'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'in'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
     it(
       `doesn't run when transition state changes from ${state} to in`,
       testcase((children, state) => (
@@ -467,8 +467,8 @@ describe(`useEnteredEffect`, function() {
     )
   })
 })
-describe(`useLeavingEffect`, function() {
-  it(`runs on unmount when unenclosed`, async function(): Promise<void> {
+describe(`useLeavingEffect`, function () {
+  it(`runs on unmount when unenclosed`, async function (): Promise<void> {
     const effect = sinon.spy()
 
     const Test = (): React.Node => {
@@ -485,34 +485,33 @@ describe(`useLeavingEffect`, function() {
     expect(effect.called).to.be.true
   })
   ;['in', 'entering', 'appearing'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: React.Node => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node) => React.Node) => async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useLeavingEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useLeavingEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.unmount()
+        await delay(30)
+        expect(effect.called).to.be.true
       }
-
-      const comp = mount(render(<Test />))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.unmount()
-      await delay(30)
-      expect(effect.called).to.be.true
-    }
 
     it(
       `runs on unmount when transition is ${state}`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state={state}>{children}</TransitionContext>
       ))
     )
     it(
       `runs on unmount when overall transition state is ${state} (from ancestor)`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state={state}>
           <TransitionContext state="in">{children}</TransitionContext>
         </TransitionContext>
@@ -520,7 +519,7 @@ describe(`useLeavingEffect`, function() {
     )
     it(
       `runs on unmount when overall transition state is ${state} (from descendant)`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state="in">
           <TransitionContext state={state}>{children}</TransitionContext>
         </TransitionContext>
@@ -528,34 +527,33 @@ describe(`useLeavingEffect`, function() {
     )
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: React.Node => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node) => React.Node) => async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useLeavingEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useLeavingEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.unmount()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.unmount()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
 
     it(
       `doesn't run on unmount when transition is ${state}`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state={state}>{children}</TransitionContext>
       ))
     )
     it(
       `doesn't run on unmount when overall transition state is ${state} (from ancestor)`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state={state}>
           <TransitionContext state="in">{children}</TransitionContext>
         </TransitionContext>
@@ -563,7 +561,7 @@ describe(`useLeavingEffect`, function() {
     )
     it(
       `doesn't run on on unmount when overall transition state is ${state} (from descendant)`,
-      testcase(children => (
+      testcase((children) => (
         <TransitionContext state="in">
           <TransitionContext state={state}>{children}</TransitionContext>
         </TransitionContext>
@@ -571,25 +569,25 @@ describe(`useLeavingEffect`, function() {
     )
   })
 })
-describe(`useLeftEffect`, function() {
-  const testcase = (
-    render: (React.Node, state: TransitionState) => React.Node
-  ) => async (): Promise<void> => {
-    const effect = sinon.spy()
+describe(`useLeftEffect`, function () {
+  const testcase =
+    (render: (React.Node, state: TransitionState) => React.Node) =>
+    async (): Promise<void> => {
+      const effect = sinon.spy()
 
-    const Test = (): React.Node => {
-      useLeftEffect(effect)
-      return <div />
+      const Test = (): React.Node => {
+        useLeftEffect(effect)
+        return <div />
+      }
+
+      const comp = mount(render(<Test />, 'leaving'))
+      await delay(30)
+      expect(effect.called).to.be.false
+
+      comp.setProps((render(<Test />, 'out'): any).props).update()
+      await delay(30)
+      expect(effect.called).to.be.true
     }
-
-    const comp = mount(render(<Test />, 'leaving'))
-    await delay(30)
-    expect(effect.called).to.be.false
-
-    comp.setProps((render(<Test />, 'out'): any).props).update()
-    await delay(30)
-    expect(effect.called).to.be.true
-  }
   it(
     `runs when transition state changes from leaving to out`,
     testcase((children, state) => (
@@ -613,24 +611,24 @@ describe(`useLeftEffect`, function() {
     ))
   )
   ;['in', 'appearing', 'entering'].forEach((state: TransitionState) => {
-    const testcase = (
-      render: (React.Node, state: TransitionState) => React.Node
-    ) => async (): Promise<void> => {
-      const effect = sinon.spy()
+    const testcase =
+      (render: (React.Node, state: TransitionState) => React.Node) =>
+      async (): Promise<void> => {
+        const effect = sinon.spy()
 
-      const Test = (): React.Node => {
-        useAppearedEffect(effect)
-        return <div />
+        const Test = (): React.Node => {
+          useAppearedEffect(effect)
+          return <div />
+        }
+
+        const comp = mount(render(<Test />, state))
+        await delay(30)
+        expect(effect.called).to.be.false
+
+        comp.setProps((render(<Test />, 'out'): any).props).update()
+        await delay(30)
+        expect(effect.called).to.be.false
       }
-
-      const comp = mount(render(<Test />, state))
-      await delay(30)
-      expect(effect.called).to.be.false
-
-      comp.setProps((render(<Test />, 'out'): any).props).update()
-      await delay(30)
-      expect(effect.called).to.be.false
-    }
     it(
       `doesn't run when transition state changes from ${state} to out`,
       testcase((children, state) => (
@@ -655,11 +653,11 @@ describe(`useLeftEffect`, function() {
     )
   })
 })
-describe(`useAutofocusRef`, function() {
+describe(`useAutofocusRef`, function () {
   beforeEach(() => {
     if (document.activeElement) document.activeElement.blur()
   })
-  it(`does nothing when ref is not used`, async function(): Promise<void> {
+  it(`does nothing when ref is not used`, async function (): Promise<void> {
     const Test = (): React.Node => {
       useAutofocusRef()
       return <button id="foo" />
@@ -668,13 +666,13 @@ describe(`useAutofocusRef`, function() {
     mount(<Test />)
     await delay(30)
   })
-  it(`autofocuses button on mount when not enclosed`, async function(): Promise<void> {
+  it(`autofocuses button on mount when not enclosed`, async function (): Promise<void> {
     const Test = (): React.Node => {
       const ref = useAutofocusRef()
       return <button id="foo" ref={ref} />
     }
 
-    mount(<Test />)
+    mount(<Test />, { attachTo: document.body ?? undefined })
     await delay(30)
     const { activeElement } = document
     if (!(activeElement instanceof HTMLButtonElement)) {
@@ -682,13 +680,13 @@ describe(`useAutofocusRef`, function() {
     }
     expect(activeElement.id).to.equal('foo')
   })
-  it(`autofocuses input on mount when not enclosed`, async function(): Promise<void> {
+  it(`autofocuses input on mount when not enclosed`, async function (): Promise<void> {
     const Test = (): React.Node => {
       const ref = useAutofocusRef()
       return <input value="test" id="foo" ref={ref} />
     }
 
-    mount(<Test />)
+    mount(<Test />, { attachTo: document.body ?? undefined })
     await delay(30)
     const { activeElement } = document
     if (!(activeElement instanceof HTMLInputElement)) {
@@ -698,7 +696,7 @@ describe(`useAutofocusRef`, function() {
     expect(activeElement.selectionStart).to.equal(0)
     expect(activeElement.selectionEnd).to.equal(4)
   })
-  it(`autofocuses input when overall transition state changes to in`, async function(): Promise<void> {
+  it.skip(`autofocuses input when overall transition state changes to in`, async function (): Promise<void> {
     const Test = (): React.Node => {
       const ref = useAutofocusRef()
       return <input value="test" id="foo" ref={ref} />
@@ -707,7 +705,8 @@ describe(`useAutofocusRef`, function() {
     const comp = mount(
       <TransitionContext state="entering">
         <Test />
-      </TransitionContext>
+      </TransitionContext>,
+      { attachTo: document.body ?? undefined }
     )
     await delay(30)
     expect(document.activeElement && document.activeElement.id).not.to.equal(

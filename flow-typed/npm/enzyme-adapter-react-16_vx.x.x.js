@@ -14,7 +14,7 @@
  */
 
 declare module 'enzyme-adapter-react-16' {
-  declare module.exports: any;
+  declare module.exports: any
 }
 
 /**
@@ -23,31 +23,31 @@ declare module 'enzyme-adapter-react-16' {
  * needed.
  */
 declare module 'enzyme-adapter-react-16/build/index' {
-  declare module.exports: any;
+  declare module.exports: any
 }
 
 declare module 'enzyme-adapter-react-16/build/ReactSixteenAdapter' {
-  declare module.exports: any;
+  declare module.exports: any
 }
 
 declare module 'enzyme-adapter-react-16/src/index' {
-  declare module.exports: any;
+  declare module.exports: any
 }
 
 declare module 'enzyme-adapter-react-16/src/ReactSixteenAdapter' {
-  declare module.exports: any;
+  declare module.exports: any
 }
 
 // Filename aliases
 declare module 'enzyme-adapter-react-16/build/index.js' {
-  declare module.exports: $Exports<'enzyme-adapter-react-16/build/index'>;
+  declare module.exports: $Exports<'enzyme-adapter-react-16/build/index'>
 }
 declare module 'enzyme-adapter-react-16/build/ReactSixteenAdapter.js' {
-  declare module.exports: $Exports<'enzyme-adapter-react-16/build/ReactSixteenAdapter'>;
+  declare module.exports: $Exports<'enzyme-adapter-react-16/build/ReactSixteenAdapter'>
 }
 declare module 'enzyme-adapter-react-16/src/index.js' {
-  declare module.exports: $Exports<'enzyme-adapter-react-16/src/index'>;
+  declare module.exports: $Exports<'enzyme-adapter-react-16/src/index'>
 }
 declare module 'enzyme-adapter-react-16/src/ReactSixteenAdapter.js' {
-  declare module.exports: $Exports<'enzyme-adapter-react-16/src/ReactSixteenAdapter'>;
+  declare module.exports: $Exports<'enzyme-adapter-react-16/src/ReactSixteenAdapter'>
 }
