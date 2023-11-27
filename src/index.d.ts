@@ -44,4 +44,4 @@ export function useEnteredEffect(effect: TransitionStateEffect): void
 export function useCameInEffect(effect: TransitionStateEffect): void
 export function useLeavingEffect(effect: TransitionStateEffect): void
 export function useLeftEffect(effect: TransitionStateEffect): void
-export function useAutofocusRef(): React.ElementRef<any>
+export function useAutofocusRef(): React.Ref<HTMLElement>
