@@ -3,7 +3,7 @@
 
 import { describe, it } from 'mocha'
 import * as React from 'react'
-import { mount } from 'enzyme'
+import { render } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import delay from 'delay'
@@ -30,7 +30,7 @@ describe('useCameInEffect', () => {
       return <div />
     }
 
-    mount(<Test />)
+    render(<Test />)
     await delay(30)
     expect(didComeIn.called).to.be.true
   })
@@ -42,7 +42,7 @@ describe('useCameInEffect', () => {
       return <div />
     }
 
-    mount(
+    render(
       <TransitionContext state="in">
         <Test />
       </TransitionContext>
@@ -53,7 +53,7 @@ describe('useCameInEffect', () => {
   ;['out', 'leaving', 'appearing', 'entering'].forEach(
     (state: TransitionState) => {
       const testcase =
-        (render: (React.Node, state: TransitionState) => React.Node) =>
+        (doRender: (React.Node, state: TransitionState) => React.Node) =>
         async (): Promise<void> => {
           const didComeIn = sinon.spy()
 
@@ -62,11 +62,11 @@ describe('useCameInEffect', () => {
             return <div />
           }
 
-          const comp = mount(render(<Test />, state))
+          const comp = render(doRender(<Test />, state))
           await delay(30)
           expect(didComeIn.called).to.be.false
 
-          comp.setProps((render(<Test />, 'in'): any).props).update()
+          comp.rerender(doRender(<Test />, 'in'))
           await delay(30)
           expect(didComeIn.called).to.be.true
         }
@@ -104,7 +104,7 @@ describe(`useAppearingEffect`, function () {
       return <div />
     }
 
-    mount(
+    render(
       <TransitionContext state="appearing">
         <Test />
       </TransitionContext>
@@ -114,7 +114,7 @@ describe(`useAppearingEffect`, function () {
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -123,11 +123,11 @@ describe(`useAppearingEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'appearing'): any).props).update()
+        comp.rerender(doRender(<Test />, 'appearing'))
         await delay(30)
         expect(effect.called).to.be.true
       }
@@ -156,7 +156,7 @@ describe(`useAppearingEffect`, function () {
   })
   ;['in', 'entering'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -165,11 +165,11 @@ describe(`useAppearingEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'appearing'): any).props).update()
+        comp.rerender(doRender(<Test />, 'appearing'))
         await delay(30)
         expect(effect.called).to.be.false
       }
@@ -206,7 +206,7 @@ describe(`useEnteringEffect`, function () {
       return <div />
     }
 
-    mount(
+    render(
       <TransitionContext state="entering">
         <Test />
       </TransitionContext>
@@ -216,7 +216,7 @@ describe(`useEnteringEffect`, function () {
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -225,11 +225,11 @@ describe(`useEnteringEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'entering'): any).props).update()
+        comp.rerender(doRender(<Test />, 'entering'))
         await delay(30)
         expect(effect.called).to.be.true
       }
@@ -258,7 +258,7 @@ describe(`useEnteringEffect`, function () {
   })
   ;['in', 'appearing'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -267,11 +267,11 @@ describe(`useEnteringEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'entering'): any).props).update()
+        comp.rerender(doRender(<Test />, 'entering'))
         await delay(30)
         expect(effect.called).to.be.false
       }
@@ -301,7 +301,7 @@ describe(`useEnteringEffect`, function () {
 })
 describe(`useAppearedEffect`, function () {
   const testcase =
-    (render: (React.Node, state: TransitionState) => React.Node) =>
+    (doRender: (React.Node, state: TransitionState) => React.Node) =>
     async (): Promise<void> => {
       const effect = sinon.spy()
 
@@ -310,11 +310,11 @@ describe(`useAppearedEffect`, function () {
         return <div />
       }
 
-      const comp = mount(render(<Test />, 'appearing'))
+      const comp = render(doRender(<Test />, 'appearing'))
       await delay(30)
       expect(effect.called).to.be.false
 
-      comp.setProps((render(<Test />, 'in'): any).props).update()
+      comp.rerender(doRender(<Test />, 'in'))
       await delay(30)
       expect(effect.called).to.be.true
     }
@@ -342,7 +342,7 @@ describe(`useAppearedEffect`, function () {
   )
   ;['out', 'leaving', 'entering'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -351,11 +351,11 @@ describe(`useAppearedEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'in'): any).props).update()
+        comp.rerender(doRender(<Test />, 'in'))
         await delay(30)
         expect(effect.called).to.be.false
       }
@@ -385,7 +385,7 @@ describe(`useAppearedEffect`, function () {
 })
 describe(`useEnteredEffect`, function () {
   const testcase =
-    (render: (React.Node, state: TransitionState) => React.Node) =>
+    (doRender: (React.Node, state: TransitionState) => React.Node) =>
     async (): Promise<void> => {
       const effect = sinon.spy()
 
@@ -394,11 +394,11 @@ describe(`useEnteredEffect`, function () {
         return <div />
       }
 
-      const comp = mount(render(<Test />, 'entering'))
+      const comp = render(doRender(<Test />, 'entering'))
       await delay(30)
       expect(effect.called).to.be.false
 
-      comp.setProps((render(<Test />, 'in'): any).props).update()
+      comp.rerender(doRender(<Test />, 'in'))
       await delay(30)
       expect(effect.called).to.be.true
     }
@@ -426,7 +426,7 @@ describe(`useEnteredEffect`, function () {
   )
   ;['out', 'leaving', 'appearing'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -435,11 +435,11 @@ describe(`useEnteredEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'in'): any).props).update()
+        comp.rerender(doRender(<Test />, 'in'))
         await delay(30)
         expect(effect.called).to.be.false
       }
@@ -476,7 +476,7 @@ describe(`useLeavingEffect`, function () {
       return <div />
     }
 
-    const comp = mount(<Test />)
+    const comp = render(<Test />)
     await delay(30)
     expect(effect.called).to.be.false
 
@@ -486,7 +486,7 @@ describe(`useLeavingEffect`, function () {
   })
   ;['in', 'entering', 'appearing'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node) => React.Node) => async (): Promise<void> => {
+      (doRender: (React.Node) => React.Node) => async (): Promise<void> => {
         const effect = sinon.spy()
 
         const Test = (): React.Node => {
@@ -494,7 +494,7 @@ describe(`useLeavingEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />))
+        const comp = render(doRender(<Test />))
         await delay(30)
         expect(effect.called).to.be.false
 
@@ -528,7 +528,7 @@ describe(`useLeavingEffect`, function () {
   })
   ;['out', 'leaving'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node) => React.Node) => async (): Promise<void> => {
+      (doRender: (React.Node) => React.Node) => async (): Promise<void> => {
         const effect = sinon.spy()
 
         const Test = (): React.Node => {
@@ -536,7 +536,7 @@ describe(`useLeavingEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />))
+        const comp = render(doRender(<Test />))
         await delay(30)
         expect(effect.called).to.be.false
 
@@ -571,7 +571,7 @@ describe(`useLeavingEffect`, function () {
 })
 describe(`useLeftEffect`, function () {
   const testcase =
-    (render: (React.Node, state: TransitionState) => React.Node) =>
+    (doRender: (React.Node, state: TransitionState) => React.Node) =>
     async (): Promise<void> => {
       const effect = sinon.spy()
 
@@ -580,11 +580,11 @@ describe(`useLeftEffect`, function () {
         return <div />
       }
 
-      const comp = mount(render(<Test />, 'leaving'))
+      const comp = render(doRender(<Test />, 'leaving'))
       await delay(30)
       expect(effect.called).to.be.false
 
-      comp.setProps((render(<Test />, 'out'): any).props).update()
+      comp.rerender(doRender(<Test />, 'out'))
       await delay(30)
       expect(effect.called).to.be.true
     }
@@ -612,7 +612,7 @@ describe(`useLeftEffect`, function () {
   )
   ;['in', 'appearing', 'entering'].forEach((state: TransitionState) => {
     const testcase =
-      (render: (React.Node, state: TransitionState) => React.Node) =>
+      (doRender: (React.Node, state: TransitionState) => React.Node) =>
       async (): Promise<void> => {
         const effect = sinon.spy()
 
@@ -621,11 +621,11 @@ describe(`useLeftEffect`, function () {
           return <div />
         }
 
-        const comp = mount(render(<Test />, state))
+        const comp = render(doRender(<Test />, state))
         await delay(30)
         expect(effect.called).to.be.false
 
-        comp.setProps((render(<Test />, 'out'): any).props).update()
+        comp.rerender(doRender(<Test />, 'out'))
         await delay(30)
         expect(effect.called).to.be.false
       }
@@ -663,7 +663,7 @@ describe(`useAutofocusRef`, function () {
       return <button id="foo" />
     }
 
-    mount(<Test />)
+    render(<Test />)
     await delay(30)
   })
   it(`autofocuses button on mount when not enclosed`, async function (): Promise<void> {
@@ -672,7 +672,7 @@ describe(`useAutofocusRef`, function () {
       return <button id="foo" ref={ref} />
     }
 
-    mount(<Test />, { attachTo: document.body ?? undefined })
+    render(<Test />, { attachTo: document.body ?? undefined })
     await delay(30)
     const { activeElement } = document
     if (!(activeElement instanceof HTMLButtonElement)) {
@@ -686,7 +686,7 @@ describe(`useAutofocusRef`, function () {
       return <input value="test" id="foo" ref={ref} />
     }
 
-    mount(<Test />, { attachTo: document.body ?? undefined })
+    render(<Test />, { attachTo: document.body ?? undefined })
     await delay(30)
     const { activeElement } = document
     if (!(activeElement instanceof HTMLInputElement)) {
@@ -702,7 +702,7 @@ describe(`useAutofocusRef`, function () {
       return <input value="test" id="foo" ref={ref} />
     }
 
-    const comp = mount(
+    const comp = render(
       <TransitionContext state="entering">
         <Test />
       </TransitionContext>,
